@@ -42,7 +42,10 @@ CapsLock::
 	If counter=%TimeOut%
 		Gosub,MENU
 	Else If (counter>TimeCapsToggle)
+	{		
 		Gosub, CapsLock_State_Toggle
+	}
+
 	Clipboard:= OldClipboard
 Return
 
@@ -55,8 +58,12 @@ MENU:
 	Menu, misc ,Add,&About,ABOUT
 	Menu, misc ,Add,&Quit,QUIT
 	Menu,convert,Add,CAPshift, :misc
-	Menu,convert,Add,
-	Menu,Convert,Add,&CapsLock Toggle,CapsLock_State_Toggle
+	Menu,convert,Add,	
+	Menu,Convert,Add,&CapsLock Toggle,CapsLock_State_Toggle	
+	If (GetKeyState("CapsLock", "T") = True )
+		Menu,Convert,Check,&CapsLock Toggle
+	Else
+		Menu,Convert,uncheck,&CapsLock Toggle	
 	Menu,convert,Add,
 	; NOTE: A_ThisMenuItem is used to determine the action to take
 	Menu,convert,Add,&UPPER CASE,MENU_ACTION
@@ -287,15 +294,22 @@ Return
 
 CapsLock_State_Toggle:
 	If GetKeyState("CapsLock","T")
+	{
 		state=Off
+		; Menu,Convert,Uncheck,&CapsLock Toggle
+	}		
 	Else
+	{
 		state=On
+		; Menu,Convert,Check,&CapsLock Toggle
+	}
 	CapsLock_State_Toggle(state)
+
 Return
 
 CapsLock_State_Toggle(State)
 {
-	SetCapsLockState,%State%
+	SetCapsLockState,%State%	
 	ToolTip,CapsLock %State%
 	SetTimer,TOOLTIP,On
 }
