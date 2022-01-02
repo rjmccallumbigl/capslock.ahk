@@ -85,6 +85,8 @@ MENU:
 	Menu,convert,Add,&Open Folder...,MENU_ACTION
 	Menu,convert,Add,&Open Page...,MENU_ACTION
 	Menu,convert,Add,&Open Parent Folder...,MENU_ACTION
+	Menu,convert,Add,
+	Menu,convert,Add,&Clean,MENU_ACTION
 	; Menu,convert,Add,
 	Menu,convert,Default,&CapsLock Toggle
 	Menu,convert,Show
@@ -281,6 +283,9 @@ Menu_Action(ThisMenuItem, string)
 	}
 	Else If ThisMenuItem =&Open Page...
 		Run, %string% 
+	Else If ThisMenuItem =&Clean
+		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
+
 Return string
 }
 
