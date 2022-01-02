@@ -8,25 +8,25 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ; /* ============== */
 
 ; @@ - My @
-::@@::rjmccallumbigl
+:*:@@::rjmccallumbigl
 Return
 
 ; ## - Phone number
-::##::123-456-7890
+:*:##::123-456-7890
 Return
 
 ; ~~ - Current time (EST)
-::~~::
+:*:~~::
 	FormatTime, time, % A_Now, ddd_MM-dd-yyyy_hh-mmtt_EST
 	send %time%
 Return
 
 ; @home - Home address
-::@home::123 Fake Street
+:*:@home::123 Fake Street
 Return
 
 ; @city - City, State ZIP
-::@city::Charlotte, NC 28215
+:*:@city::Charlotte, NC 28215
 Return
 
 
