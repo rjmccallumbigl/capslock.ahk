@@ -23,7 +23,7 @@ spotifyObject := new Spotify
   Run Spotify
 return
 
-; CTRL + Play shuffles devices
+; CTRL + Play was supposed to shuffle devices
 ; This API appears to be bugged because it only returns my current active playback device, not my other available Devices
 ; https://developer.spotify.com/console/get-users-available-devices/
 ; https://developer.spotify.com/documentation/web-api/guides/using-connect-web-api/#devices-not-appearing-on-device-list
@@ -36,19 +36,25 @@ return
 ; [...]
 ; Return
 
-; CTRL + Play gives Now Playing information in a tool tip
+; Media_Play_Pause toggles playback and shows Now Playing information in a tool tip
+*Media_Play_Pause:: 
+  CurrentPlayback := spotifyObject.Player.GetCurrentPlaybackInfo()
+  Send, {Media_Play_Pause}
+  showSongInfo(CurrentPlayback)
+Return
+; CTRL + Media_Play_Pause just gives Now Playing information in a tool tip
 ^Media_Play_Pause:: 
   CurrentPlayback := spotifyObject.Player.GetCurrentPlaybackInfo()
-  artistString .= ""
-  for index, element in CurrentPlayback.Track.artists
-  {
-    artistString .= ", " . CurrentPlayback.Track.artists[index].name
-  }
-  artistString := substr(artistString,2)
-  ToolTip,% "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"floor(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"floor(mod(CurrentPlayback.Track.duration/1000,60))
-  SetTimer,TOOLTIP,On 
+  showSongInfo(CurrentPlayback)
 Return
 
+; Media_Next shows song info when going to next track
+*Media_Next::
+  Send,{Media_Next}
+  Sleep, 1000
+  CurrentPlayback := spotifyObject.Player.GetCurrentPlaybackInfo()
+  showSongInfo(CurrentPlayback)
+return
 ; CTRL + Next seeks forward ~10 seconds
 ^Media_Next:: 
   CurrentPlayer := spotifyObject.Player
@@ -58,6 +64,13 @@ Return
   SetTimer,TOOLTIP,On
 Return
 
+; Show song info when going to previous track
+*Media_Prev::
+  Send,{Media_Prev}
+  Sleep, 1000
+  CurrentPlayback := spotifyObject.Player.GetCurrentPlaybackInfo()
+  showSongInfo(CurrentPlayback)
+return
 ; CTRL + Prev seeks backwards ~10 seconds
 ^Media_Prev::
   CurrentPlayer := spotifyObject.Player
@@ -116,7 +129,21 @@ Launch_Media::
   SetTimer,TOOLTIP,On
 Return
 
+; Helps display Tooltip
 TOOLTIP:
   ToolTip,
   SetTimer,TOOLTIP,Off
 Return
+
+; Displays information about the current song (title, artists, album, progress)
+showSongInfo(CurrentPlayback)
+{ 
+  for index, element in CurrentPlayback.Track.artists
+  {
+    artistString .= ", " . CurrentPlayback.Track.artists[index].name
+  }
+  artistString := substr(artistString,2)
+  ToolTip,% "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"floor(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"floor(mod(CurrentPlayback.Track.duration/1000,60))
+  SetTimer,TOOLTIP,On 
+  artistString := ""
+}
