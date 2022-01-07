@@ -65,14 +65,14 @@ MENU:
 	Else
 		Menu,Convert,uncheck,&CapsLock Toggle	
 	Menu,convert,Add,
-	; NOTE: A_ThisMenuItem is used to determine the action to take
 	Menu,convert,Add,&UPPER CASE,MENU_ACTION
 	Menu,convert,Add,&lower case,MENU_ACTION
 	Menu,convert,Add,
 	Menu,convert,Add,&Title Case,MENU_ACTION
 	Menu,convert,Add,&Sentence case,MENU_ACTION
 	Menu,convert,Add,&iNVERT cASE,MENU_ACTION
-	Menu,convert,Add,&HaLf CaPs CaSe,MENU_ACTION
+	Menu,convert,Add,&SpOnGeBoB,MENU_ACTION
+	; Menu,convert,Add,&HaLf CaPs CaSe,MENU_ACTION
 	Menu,convert,Add,
 	Menu,convert,Add,Remove_&under_scores,MENU_ACTION
 	Menu,convert,Add,Remove.&full.stops,MENU_ACTION
@@ -87,7 +87,9 @@ MENU:
 	Menu,convert,Add,&Open Parent Folder...,MENU_ACTION
 	Menu,convert,Add,
 	Menu,convert,Add,&Clean,MENU_ACTION
-	; Menu,convert,Add,
+	Menu,convert,Add,&RemoveResourceGroups.ps1,MENU_ACTION
+	Menu,convert,Add,&createNewVM.ps1,MENU_ACTION
+	Menu,convert,Add,&{Update NSGS}.ps1,MENU_ACTION	
 	Menu,convert,Default,&CapsLock Toggle
 	Menu,convert,Show
 Return
@@ -112,6 +114,25 @@ Menu_Action(ThisMenuItem, string)
 
 	Else If ThisMenuItem =&Title Case
 		StringLower,string,string,T
+	Else If ThisMenuItem =&SpOnGeBoB
+	{
+		StringCaseSense,On
+		newString := ""
+		splitString:= StrSplit(string)
+		for index, element in splitString
+		{
+			If (Mod(index,2) = 0)
+			{
+				StringUpper, newChar, element
+				newString .= newChar
+			} Else{
+				StringLower, newChar, element
+				newString .= newChar
+			}
+		}
+		string := newString
+		StringCaseSense,Off
+	}	
 
 	Else If ThisMenuItem =&iNVERT cASE
 	{
@@ -139,53 +160,13 @@ Menu_Action(ThisMenuItem, string)
 		StringCaseSense,Off
 	}
 
-	; HaLf CaPs CaSe
+	; HaLf CaPs CaSe, only works with one word
 	Else If ThisMenuItem =&HaLf CaPs CaSe		
 	{
 		StringLower, string, string, T
 		StringCaseSense,On
 		Loop, Parse, string
-			; {
-		; 	If (Mod(%A_Index%, 2) = 0)
-		; 		char := %char% + (StringUpper, temp, %A_LoopField%)
-		; 	Else
-		; 		char := %char% + %A_LoopField%
-		; }
-		; string.=char
 
-		; One day replacement: https://github.com/jojolepro/half_caps/blob/master/src/main.rs
-		; 		fn main() {
-		;     let args: Vec<String> = env::args().collect();
-		;     let mut buffer = String::new();
-		;     let inputs = if args.len() < 2 {
-		;         std::io::stdin().lock().read_to_string(&mut buffer).expect("Failed to read from stdin");
-		;         vec![buffer]
-		;     } else {
-		;         args[1..].to_vec()
-		;     };
-		;     let str_len: usize = inputs.iter().map(|s| s.len()).sum();
-		;     let mut buf = String::with_capacity(str_len + inputs.len());
-		;     let mut up = false;
-		;     for input in inputs {
-		;         for c in input.chars(){
-		;             if c.is_alphabetic(){
-		;                 let c = if up{
-		;                     c.to_uppercase().to_string()
-		;                 }else{
-		;                     c.to_lowercase().to_string()
-		;                 };
-		;                 buf.push_str(&c);
-		;                 up = !up;
-		;             }else{
-		;                 buf.push(c);
-		;             }
-		;         }
-		;         buf.push(' ');
-		;     }
-		;     println!("{}",buf);
-		; }
-
-		; Doesn't work with spaces, will replace with the above one of these days
 		lower= abcdefghijklmnopqrstuvwxyz
 		upper= ABCDEFGHIJKLMNOPQRSTUVWXYZ
 		StringLen,length,string
@@ -285,6 +266,12 @@ Menu_Action(ThisMenuItem, string)
 		Run, %string% 
 	Else If ThisMenuItem =&Clean
 		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
+	Else If ThisMenuItem =&RemoveResourceGroups.ps1
+		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\byronbayer\Powershell\Remove-ResourceGroupsAsyncWithPattern.ps1"
+	Else If ThisMenuItem =&createNewVM.ps1
+		Run, C:\Users\rymccall\GitHub\Azure-PowerShell---Create-New-VM\createNewVM.ps1
+	Else If ThisMenuItem =&{Update NSGS}.ps1
+		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\Update your NSGs with a rule scoped to your IP address.ps1"
 
 Return string
 }
@@ -325,4 +312,3 @@ Return
 
 QUIT:
 ExitApp
-
