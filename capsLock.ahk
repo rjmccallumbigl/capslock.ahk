@@ -13,6 +13,7 @@ SetTimer,TOOLTIP,1500
 SetTimer,TOOLTIP,Off
 TimeCapsToggle =5
 TimeOut =30
+global string2 := ""
 
 ; Define hotstring, trigger via hold CapsLock for 1.5s or hold Right Click + Middle click
 CapsLock::
@@ -49,7 +50,11 @@ CapsLock::
 		Gosub, CapsLock_State_Toggle
 	}
 
-	Clipboard:= OldClipboard
+	if (string2){
+		clipboard:= string2
+	} else {
+		Clipboard:= OldClipboard
+	}
 Return
 
 ; Build CapsLock menu
@@ -63,7 +68,7 @@ MENU:
 	Menu, misc, Add, &Quit, QUIT
 	Menu, convert, Add, CAPshift, :misc
 	Menu, convert, Add, 	
-	Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle	
+	Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle
 	If (GetKeyState("CapsLock", "T") = True)
 		Menu,Convert,Check, &CapsLock Toggle
 	Else
@@ -91,6 +96,8 @@ MENU:
 	Menu, convert, Add, &Open Page..., MENU_ACTION
 	Menu, convert, Add, &Open Parent Folder..., MENU_ACTION
 	Menu, convert, Add, &Clipboard to File...., MENU_ACTION	
+	Menu, convert, Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
+	Menu, convert, Add, &File to Clipboard..., MENU_ACTION	
 	Menu, convert, Add, 
 	Menu, convert, Add, &Clean, MENU_ACTION
 	Menu, convert, Add, &RemoveResourceGroups.ps1, MENU_ACTION
@@ -106,7 +113,9 @@ MENU_ACTION:
 	string=%clipboard%
 	clipboard:=Menu_Action(A_ThisMenuItem, string)
 	WinActivate, ahk_id %Active_Window%
-	Send,^v
+	If (!string2){
+		Send,^v
+	}
 	ToolTip, %A_ThisMenuItem%
 	SetTimer,TOOLTIP,On
 Return
@@ -249,7 +258,7 @@ Menu_Action(ThisMenuItem, string)
 			Run explorer.exe %subString%
 		}
 	}
-	; If the copied text is a valid folder, open the parent folder in Windows Explorer
+	; If the copied text is a valid file, open the parent folder in Windows Explorer and highlight the file
 	Else If ThisMenuItem =&Open Parent Folder...
 	{
 		SplitPath, string,, dir
@@ -261,6 +270,21 @@ Menu_Action(ThisMenuItem, string)
 	; Run old portable Ccleaner in auto mode
 	Else If ThisMenuItem =&Clean
 		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
+	Else If (ThisMenuItem ="&Copy File Names and Details from Folder to Clipboard...") {
+		; https://lexikos.github.io/v2/docs/FAQ.htm#output
+		SplitPath, string,, dir		
+		string2Temp := dir . "\string2.txt"
+		RunWait %comspec% ' "/c dir "%dir%" /a /o /q /t > "%string2Temp%" "',, hide
+		string2File := FileOpen(string2Temp, "rw")
+		string2 := string2File.Read()
+		string2File.Close()
+		FileDelete, %string2Temp%
+	}
+	Else If (ThisMenuItem ="&File to Clipboard..."){
+		file := FileOpen(string, "r")	
+		string2 := File.Read()
+		file.Close()
+	}
 	; Run RemoveResourceGroups.ps1 script
 	Else If ThisMenuItem =&RemoveResourceGroups.ps1
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\byronbayer\Powershell\Remove-ResourceGroupsAsyncWithPattern.ps1"
