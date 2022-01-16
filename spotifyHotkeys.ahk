@@ -146,16 +146,8 @@ playlistMenu(){
   Menu, convert, Delete	 
   Menu, convert, Add, Add the currently playing Spotify song to a playlist..., SPOTIFY_MENU_ACTION
   Menu, convert, Add,
-  Menu, convert, Add, &Starred, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Starred2, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Starred3, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Social Media Likes, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &New School, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Instrumentals, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Ryan's Lofi, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Video Game Rap, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &Not Rap, SPOTIFY_MENU_ACTION
-  Menu, convert, Add, &My Current Playlist, SPOTIFY_MENU_ACTION
+  Menu, convert, Add, &Enter your playlist name here, SPOTIFY_MENU_ACTION
+  Menu, convert, Add, &Enter your playlist2 name here, SPOTIFY_MENU_ACTION
   Menu, convert, Default, Add the currently playing Spotify song to a playlist...
   Menu, convert, Show
 Return
@@ -165,24 +157,10 @@ Return
 getPlaylistID(playlistName){
   If (playlistName == "&Starred"){
     return "id"
-  } Else If (playlistName == "&Starred2"){
-    return "id"
-  } Else If (playlistName == "&Starred3"){
-    return "id"
-  } Else If (playlistName == "&Social Media Likes"){
-    return "id"
-  } Else If (playlistName == "&New School"){
-    return "id"
-  } Else If (playlistName == "&Instrumentals"){
-    return "id"
-  } Else If (playlistName == "&Ryan's Lofi"){
-    return "id"
-  } Else If (playlistName == "&Video Game Rap"){
-    return "id"
-  } Else If (playlistName == "&Not Rap"){
-    return "id"
-  } Else If (playlistName == "&My Current Playlist"){
-    return "id"
+  } Else If (playlistName == "&Enter your playlist name here"){
+    return "enter id of your playlist here"
+  } Else If (playlistName == "&Enter your playlist2 name here"){
+    return "enter id of your playlist2 here"
   } 
 }
 
