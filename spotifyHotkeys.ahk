@@ -41,6 +41,12 @@ Return
   showSongInfo(CurrentPlayback)
 Return
 
+; Shift + CTRL + Media_Play_Pause gives Now Playing information in a tool tip and pastes to clipboard
+^+Media_Play_Pause:: 
+  CurrentPlayback := spotifyObject.Player.GetCurrentPlaybackInfo()
+  clipboard:= showSongInfo(CurrentPlayback)
+Return
+
 ; Media_Next shows song info when going to next track
 *Media_Next::
   Send,{Media_Next}
@@ -122,14 +128,16 @@ addSongToPlaylist(playlistID, name){
 ; Displays information about the current song (title, artists, album, progress)
 showSongInfo(CurrentPlayback)
 { 
+  artistString := ""
   for index, element in CurrentPlayback.Track.artists
   {
     artistString .= ", " . CurrentPlayback.Track.artists[index].name
   }
   artistString := substr(artistString,2)
-  ToolTip,% "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"floor(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"floor(mod(CurrentPlayback.Track.duration/1000,60))
+  songInfo := "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"floor(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"floor(mod(CurrentPlayback.Track.duration/1000,60))
+  ToolTip,%songInfo%
   SetTimer,TOOLTIP,On 
-  artistString := ""
+return songInfo
 }
 
 ; Build Spotify playlist menu
