@@ -12,7 +12,10 @@ SetTimer,TOOLTIP,Off
 ; Download https://github.com/CloakerSmoker/Spotify.ahk
 ; Add shortcut to shell:Startup
 ; Add lib folder to shell:Startup
-; In Windows settings, set .mp3 association to Spotify Windows App: C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.173.517.0_x86__zpdnekdrzrea0\Spotify.exe
+; In Windows settings, set .mp3 association to Spotify Windows App (Spotify.exe) by right clicking an mp3 file, selecting Open With -> Choose another app, Lookf for another app on this PC, find Spotify.exe. If you don't do this, Windows might open Windows Media Player or another media app whenever you press a media key.
+; If you're using the Windows app, run this in PowerShell (as admin) to get exact location of Spotify.exe: "$((ls "C:\Program Files\WindowsApps\" | Where-Object { $_ -like "*spotify*"})[0].FullName)\Spotify.exe"
+; If Spotify updated, the folder changed and Windows Media Player or another app may open when you press your media keys. Redo the above two steps.
+; If you get an error message attempting to set Spotify to open mp3s, open Task Manager with CTRL + Shift + Esc, click File -> Open New Task, check "Create this task with administrative privileges", type Explorer, and press enter. Try it from there. Then close Explorer and see if the media keys work.
 ; https://community.spotify.com/t5/Desktop-Windows/Keyboard-media-launch-button/td-p/1736288
 
 ; Create new Spotify object
