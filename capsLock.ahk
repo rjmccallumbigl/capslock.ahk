@@ -3,6 +3,20 @@ SendMode Input ; Recommended for new scripts due to its superior speed and relia
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ; Source/Inspiration https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/page-2
 
+/*
+***************************************** 
+TODO:
+Ahk, get capital letters and get small letters, paste them
+Sort lines alphabetically ala https://marketplace.visualstudio.com/items?itemName=Tyriar.sort-lines
+Wrap lines with (), {}, [], '', "", <>, <##>, /**/
+Put file in new subfolder
+Pull file out to parent Folder
+Storage Usage
+Indicate what processes/programs are using this file
+
+*******************************************
+*/
+
 About =
 (LTrim0
 	Slows down and extends the capslock key. Hold for 0.05 sec to toggle capslock on or off. Hold for 0.3 sec to show a menu that converts selected text to UPPER CASE, lower case, Title Case, iNVERT cASE, etc. Also can trigger via Right Click + Middle Click.
@@ -11,59 +25,59 @@ About =
 ; Declare variables
 SetTimer,TOOLTIP,1500
 SetTimer,TOOLTIP,Off
-TimeCapsToggle =5
-TimeOut =30
+TimeCapsToggle = 5
+TimeOut = 30
 global string2 := ""
 
 ; Define hotstring, trigger via hold CapsLock for 1.5s or hold Right Click + Middle click
 CapsLock::
 ~RButton & MButton::
 	OldClipboard:= ClipboardAll ;Save existing clipboard.
-	counter=0
+	counter = 0
 	Progress, ZH16 ZX0 ZY0 B R0-%TimeOut%
 	Loop, %TimeOut%
 	{
-		Sleep,10
-		counter+=1
+		Sleep, 10
+		counter += 1
 		Progress, %counter% ;, SubText, MainText, WinTitle, FontName
 		If (counter = TimeCapsToggle)
 			Progress, ZH16 ZX0 ZY0 B R0-%TimeOut% CBFF0000
 		if (A_ThisHotkey = "CapsLock")
 		{
-			GetKeyState,state,CapsLock,P
-			If state=U
+			GetKeyState, state, CapsLock, P
+			If state = U
 				Break
 		}
 
 		Else If (A_ThisHotkey = "MButton")
 		{
-			GetKeyState,state,MButton,P
-			If state=U
+			GetKeyState, state, MButton, P
+			If state = U
 				Break
 		}
 	}
 	Progress, Off
-	If counter=%TimeOut%
-		Gosub,MENU
-	Else If (counter>TimeCapsToggle)
+	If counter = %TimeOut%
+		Gosub, MENU
+	Else If (counter > TimeCapsToggle)
 	{		
 		Gosub, CapsLock_State_Toggle
 	}
 
 	if (string2){
-		clipboard:= string2
+		clipboard := string2
 	} else {
-		Clipboard:= OldClipboard
+		Clipboard := OldClipboard
 	}
 Return
 
 ; Build CapsLock menu
 MENU:
 	Winget, Active_Window, ID, A
-	Send,^c
-	ClipWait,1
-	Menu,convert,Add
-	Menu,convert,Delete
+	Send, ^c
+	ClipWait, 1
+	Menu, convert, Add
+	Menu, convert, Delete
 	Menu, misc, Add, &About, ABOUT
 	Menu, misc, Add, &Quit, QUIT
 	Menu, convert, Add, CAPshift, :misc
@@ -81,6 +95,7 @@ MENU:
 	Menu, convert, Add, &Sentence case, MENU_ACTION
 	Menu, convert, Add, &iNVERT cASE, MENU_ACTION
 	Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
+	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION
 	Menu, convert, Add, 
 	Menu, convert, Add, Remove_&under_scores, MENU_ACTION
 	Menu, convert, Add, Remove.&full.stops, MENU_ACTION
@@ -102,22 +117,23 @@ MENU:
 	Menu, convert, Add, &Clean, MENU_ACTION
 	Menu, convert, Add, &RemoveResourceGroups.ps1, MENU_ACTION
 	Menu, convert, Add, &createNewVM.ps1, MENU_ACTION
-	Menu, convert, Add, &{Update NSGS}.ps1, MENU_ACTION			
-	Menu,convert,Default,&CapsLock Toggle	
-	Menu,convert,Show
+	Menu, convert, Add, &{Update NSGS}.ps1, MENU_ACTION		
+	Menu, convert, Add, &getDiskSpace.ps1, MENU_ACTION				
+	Menu,convert, Default, &CapsLock Toggle	
+	Menu, convert, Show
 Return
 
-; Pass copied to string to specified menu action, then paste if required
+; Pass copied string to specified menu action, then paste if required
 MENU_ACTION:
-	AutoTrim,Off
-	string=%clipboard%
-	clipboard:=Menu_Action(A_ThisMenuItem, string)
+	AutoTrim, Off
+	string = %clipboard%
+	clipboard := Menu_Action(A_ThisMenuItem, string)
 	WinActivate, ahk_id %Active_Window%
 	If (!string2){
-		Send,^v
+		Send, ^v
 	}
 	ToolTip, %A_ThisMenuItem%
-	SetTimer,TOOLTIP,On
+	SetTimer, TOOLTIP, On
 Return
 
 ; Define menu actions
@@ -125,15 +141,15 @@ Menu_Action(ThisMenuItem, string)
 {
 	; Convert to UPPER CASE
 	If ThisMenuItem =&UPPER CASE
-		StringUpper,string,string
+		StringUpper, string, string
 
 	; Convert to lower case
 	Else If ThisMenuItem =&lower case
-		StringLower,string,string
+		StringLower, string, string
 
 	; Convert to Title Case
 	Else If ThisMenuItem =&Title Case
-		StringLower,string,string,T
+		StringLower, string, string, T
 
 	; Convert to HaLf CaPs CaSe
 	Else If ThisMenuItem =&SpOnGeBoB
@@ -153,85 +169,100 @@ Menu_Action(ThisMenuItem, string)
 			}
 		}
 		string := newString
-		StringCaseSense,Off
+		StringCaseSense, Off
+	}
+	; Add extra spaces between every character except spaces and punctuation
+	Else If ThisMenuItem =&S p r e a d T e x t
+	{
+		newString := ""
+		splitString:= StrSplit(string)
+		for index, element in splitString
+		{					
+			If (element != " "){
+				newString .= element				
+			} 
+			; Do not space out punctuation. Loooks better to me.
+			If !RegExMatch(splitString[index + 1], "[[:punct:]]")
+				newString .= " "
+		}
+		string := newString
 	}	
-
 	; Convert to iNVERT cASE
 	Else If ThisMenuItem =&iNVERT cASE
 	{
 		StringCaseSense,On
-		lower=abcdefghijklmnopqrstuvwxyz
-		upper=ABCDEFGHIJKLMNOPQRSTUVWXYZ
-		StringLen,length,string
-		Loop,%length%
+		lower = abcdefghijklmnopqrstuvwxyz
+		upper = ABCDEFGHIJKLMNOPQRSTUVWXYZ
+		StringLen, length, string
+		Loop, %length%
 		{
-			StringLeft,char,string,1
-			StringGetPos,pos,lower,%char%
-			pos+=1
-			If pos<>0
-				StringMid,char,upper,%pos%,1
+			StringLeft, char, string, 1
+			StringGetPos, pos, lower, %char%
+			pos += 1
+			If pos <> 0
+				StringMid, char, upper, %pos%, 1
 			Else
 			{
-				StringGetPos,pos,upper,%char%
-				pos+=1
-				If pos<>0
-					StringMid,char,lower,%pos%,1
+				StringGetPos, pos, upper, %char%
+				pos += 1
+				If pos <> 0
+					StringMid, char, lower, %pos%, 1
 			}
-			StringTrimLeft,string,string,1
-			string.=char
+			StringTrimLeft, string, string, 1
+			string .= char
 		}
-		StringCaseSense,Off
+		StringCaseSense, Off
 	}
 
 	; Convert to Sentence case
 	Else If ThisMenuItem =&Sentence case
 	{
-		StringCaseSense,On
-		lower=abcdefghijklmnopqrstuvwxyz
-		upper=ABCDEFGHIJKLMNOPQRSTUVWXYZ
-		dot=1
-		StringLen,length,string
-		Loop,%length%
+		StringCaseSense, On
+		lower = abcdefghijklmnopqrstuvwxyz
+		upper = ABCDEFGHIJKLMNOPQRSTUVWXYZ
+		dot = 1
+		StringLen, length, string
+		Loop, %length%
 		{
-			StringLeft,char,string,1
-			if (char==".")
+			StringLeft, char, string, 1
+			if (char == ".")
 			{
-				dot=1
+				dot = 1
 			}
 			else
 			{
-				if (dot=1)
+				if (dot = 1)
 				{
-					StringGetPos,pos,lower,%char%
-					pos+=1
-					If pos<>0
-						StringMid,char,upper,%pos%,1
+					StringGetPos, pos, lower, %char%
+					pos += 1
+					If pos <> 0
+						StringMid, char, upper, %pos%, 1
 				}
 				else
 				{
-					StringGetPos,pos,upper,%char%
-					pos+=1
-					If pos<>0
-						StringMid,char,lower,%pos%,1
+					StringGetPos, pos, upper, %char%
+					pos += 1
+					If pos <> 0
+						StringMid, char, lower, %pos%, 1
 				}
 
-				if (char<> " ")
-					dot=0
+				if (char <> " ")
+					dot = 0
 			}
-			StringTrimLeft,string,string,1
-			string.=char
+			StringTrimLeft, string, string, 1
+			string .= char
 		}
-		StringCaseSense,Off
+		StringCaseSense, Off
 	}
 	; Remove under_scores
 	Else If ThisMenuItem =Remove_&under_scores
-		StringReplace, string, string,_,%A_Space%, All
+		StringReplace, string, string, _, %A_Space%, All
 	; Remove periods.from.text
 	Else If ThisMenuItem =Remove.&full.stops
-		StringReplace, string, string,.,%A_Space%, All
+		StringReplace, string, string, ., %A_Space%, All
 	; Remove all-dashes
 	Else If ThisMenuItem =Remove-&dashes
-		StringReplace, string, string,-,%A_Space%, All
+		StringReplace, string, string, -, %A_Space%, All
 	; Google the highlighted word
 	Else If ThisMenuItem =&Google
 		Run, http://www.google.com/search?q=%string%
@@ -249,7 +280,7 @@ Menu_Action(ThisMenuItem, string)
 	{
 
 		if (FileExist(string))
-			Run explorer.exe /select`,%string%
+			Run explorer.exe /select`, %string%
 		else
 		{
 			replacement := RegExReplace(string, "[^\\\/]+[\\\/]?$")
@@ -262,7 +293,7 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&Open Parent Folder...
 	{
 		SplitPath, string,, dir
-		Run explorer.exe /select`,%dir%
+		Run explorer.exe /select`, %dir%
 	}
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
@@ -272,9 +303,9 @@ Menu_Action(ThisMenuItem, string)
 		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
 	Else If (ThisMenuItem ="&Copy File Names and Details from Folder to Clipboard...") {
 		; https://lexikos.github.io/v2/docs/FAQ.htm#output
-		SplitPath, string,, dir		
+		SplitPath, string, , dir
 		string2Temp := dir . "\string2.txt"
-		RunWait %comspec% ' "/c dir "%dir%" /a /o /q /t > "%string2Temp%" "',, hide
+		RunWait %comspec% ' "/c dir "%dir%" /a /o /q /t > "%string2Temp%" "', , hide
 		string2File := FileOpen(string2Temp, "rw")
 		string2 := string2File.Read()
 		string2File.Close()
@@ -285,6 +316,9 @@ Menu_Action(ThisMenuItem, string)
 		string2 := File.Read()
 		file.Close()
 	}
+	; Run getDiskSpace.ps1 script
+	Else If ThisMenuItem =&getDiskSpace.ps1
+		Run, powershell -NoExit -File "D:\Dropbox\code\getDiskSpace.ps1"
 	; Run RemoveResourceGroups.ps1 script
 	Else If ThisMenuItem =&RemoveResourceGroups.ps1
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\byronbayer\Powershell\Remove-ResourceGroupsAsyncWithPattern.ps1"
@@ -327,11 +361,11 @@ Return
 CapsLock_State_Toggle:
 	If GetKeyState("CapsLock", "T")
 	{
-		state=Off
+		state = Off
 	}		
 	Else
 	{
-		state=On
+		state = On
 	}
 	CapsLock_State_Toggle(state)
 Return
@@ -357,20 +391,20 @@ text_swap(string)
 	div .= "- " ; Make divider between old string and new string
 	mouseGetPos, mx, my
 	swapped := string
-	toolTip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my+50 ; Display old string
+	toolTip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my + 50 ; Display old string
 	; Loop ToolTip until endkey is selected
 	loop,
 	{
 		input, new_input, L1, {enter}{esc}{backspace}
 		endkey := strReplace(errorLevel, "EndKey:", "")
-		if endkey contains enter,escape
+		if endkey contains enter, escape
 			break
 		if (endkey = "backspace")
 			stringTrimRight, this, this, 1
 		if inStr(string, new_input)
 			this .= new_input
 		swapped := swap(string, this)
-		tooltip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my+50
+		tooltip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my + 50
 	}
 	tooltip, ; clear
 	; Save swapped text
