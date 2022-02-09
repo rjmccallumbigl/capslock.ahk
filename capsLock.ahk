@@ -8,7 +8,6 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 TODO:
 Ahk, get capital letters and get small letters, paste them
 Sort lines alphabetically ala https://marketplace.visualstudio.com/items?itemName=Tyriar.sort-lines
-Wrap lines with (), {}, [], '', "", <>, <##>, /**/
 Put file in new subfolder
 Pull file out to parent Folder
 Storage Usage
@@ -101,21 +100,23 @@ MENU:
 	Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
 	Menu, Modify Text..., Add, Remove-&dashes, MENU_ACTION
 	Menu, Modify Text..., Add, Remove_illegal_characters, MENU_ACTION
-	Menu, Modify Text..., Add, &Remove emojis, MENU_ACTION
+	Menu, Modify Text..., Add, Remove &emojis, MENU_ACTION
+	Menu, Modify Text..., Add, Remove &Uppercase, MENU_ACTION
+	Menu, Modify Text..., Add, Remove &Lowercase, MENU_ACTION
 	Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
 	Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
 	Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
 	Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
 	Menu, convert, Add, &Modify Text..., :Modify Text...
-	Menu, convert, Add, 	
+	Menu, convert, Add,
 	Menu, Wrap Text..., Add, &`(...), MENU_ACTION
 	Menu, Wrap Text..., Add, &`{...}, MENU_ACTION
 	Menu, Wrap Text..., Add, &`[...], MENU_ACTION
-	Menu, Wrap Text..., Add, &`'...', MENU_ACTION
-	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
 	Menu, Wrap Text..., Add, &`<...>, MENU_ACTION
 	Menu, Wrap Text..., Add, `<&#...#>, MENU_ACTION
 	Menu, Wrap Text..., Add, &`/*...*/, MENU_ACTION
+	Menu, Wrap Text..., Add, &`'...', MENU_ACTION
+	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
 	Menu, convert, Add, &Wrap Text..., :Wrap Text...
 	Menu, convert, Add, 
 	Menu, Browser Search..., Add, &Google, MENU_ACTION
@@ -170,7 +171,7 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&Title Case
 		StringLower, string, string, T
 
-	; Convert to HaLf CaPs CaSe
+	; Convert to HaLf CaPs CaSe (AKA alternating caps)
 	Else If ThisMenuItem =&SpOnGeBoB
 	{
 		StringCaseSense,On
@@ -290,11 +291,17 @@ Menu_Action(ThisMenuItem, string)
 		string := RegExReplace(string, "[/\\?%*:|<>]", "$u1")
 	}
 	; Modify string to remove emojis
-	Else If ThisMenuItem =&Remove emojis
+	Else If ThisMenuItem =Remove &emojis
 	{
 		; string := RegExReplace(string, "[\uD800-\uDFFF]","")
 		string := RegExReplace(string, "\p{C}","")
 	}
+	; Return lowercase chars
+	Else If ThisMenuItem =Remove &Uppercase
+		string := RegExReplace(string, "[A-Z]","")
+	; Return uppercase chars
+	Else If ThisMenuItem =Remove &Lowercase
+		string := RegExReplace(string, "[a-z]","")
 	; Convert phrase separated_by_or-to lowerCamelCase
 	Else If ThisMenuItem =&snake_Case to CamelCase
 	{
