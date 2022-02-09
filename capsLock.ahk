@@ -6,8 +6,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 /*
 ***************************************** 
 TODO:
-Ahk, get capital letters and get small letters, paste them
-Sort lines alphabetically ala https://marketplace.visualstudio.com/items?itemName=Tyriar.sort-lines
+
 Put file in new subfolder
 Pull file out to parent Folder
 Storage Usage
@@ -103,6 +102,7 @@ MENU:
 	Menu, Modify Text..., Add, Remove &emojis, MENU_ACTION
 	Menu, Modify Text..., Add, Remove &Uppercase, MENU_ACTION
 	Menu, Modify Text..., Add, Remove &Lowercase, MENU_ACTION
+	Menu, Modify Text..., Add, &`Sort, MENU_ACTION
 	Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
 	Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
 	Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
@@ -302,6 +302,9 @@ Menu_Action(ThisMenuItem, string)
 	; Return uppercase chars
 	Else If ThisMenuItem =Remove &Lowercase
 		string := RegExReplace(string, "[a-z]","")
+	; Sort the string 
+	Else If ThisMenuItem =&`Sort
+		Sort, string
 	; Convert phrase separated_by_or-to lowerCamelCase
 	Else If ThisMenuItem =&snake_Case to CamelCase
 	{
