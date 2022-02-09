@@ -1,7 +1,7 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
-; Source/Inspiration https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/page-2
+; Source/Inspiration https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
 
 /*
 ***************************************** 
@@ -95,30 +95,49 @@ MENU:
 	Menu, convert, Add, &Sentence case, MENU_ACTION
 	Menu, convert, Add, &iNVERT cASE, MENU_ACTION
 	Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
-	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION
+	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION	
 	Menu, convert, Add, 
-	Menu, convert, Add, Remove_&under_scores, MENU_ACTION
-	Menu, convert, Add, Remove.&full.stops, MENU_ACTION
-	Menu, convert, Add, Remove-&dashes, MENU_ACTION
-	Menu, convert, Add, &Swap at Anchor Word, MENU_ACTION
+	Menu, Modify Text..., Add, Remove_&under_scores, MENU_ACTION
+	Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
+	Menu, Modify Text..., Add, Remove-&dashes, MENU_ACTION
+	Menu, Modify Text..., Add, Remove_illegal_characters, MENU_ACTION
+	Menu, Modify Text..., Add, &Remove emojis, MENU_ACTION
+	Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
+	Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
+	Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
+	Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
+	Menu, convert, Add, &Modify Text..., :Modify Text...
+	Menu, convert, Add, 	
+	Menu, Wrap Text..., Add, &`(...), MENU_ACTION
+	Menu, Wrap Text..., Add, &`{...}, MENU_ACTION
+	Menu, Wrap Text..., Add, &`[...], MENU_ACTION
+	Menu, Wrap Text..., Add, &`'...', MENU_ACTION
+	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
+	Menu, Wrap Text..., Add, &`<...>, MENU_ACTION
+	Menu, Wrap Text..., Add, `<&#...#>, MENU_ACTION
+	Menu, Wrap Text..., Add, &`/*...*/, MENU_ACTION
+	Menu, convert, Add, &Wrap Text..., :Wrap Text...
 	Menu, convert, Add, 
-	Menu, convert, Add, &Google, MENU_ACTION
-	Menu, convert, Add, &Thesaurus, MENU_ACTION
-	Menu, convert, Add, &Wikipedia, MENU_ACTION
-	Menu, convert, Add, &Define, MENU_ACTION
+	Menu, Browser Search..., Add, &Google, MENU_ACTION
+	Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
+	Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
+	Menu, Browser Search..., Add, &Define, MENU_ACTION
+	Menu, convert, Add, &Browser Search..., :Browser Search...
 	Menu, convert, Add, 
-	Menu, convert, Add, &Open Folder..., MENU_ACTION
-	Menu, convert, Add, &Open Page..., MENU_ACTION
-	Menu, convert, Add, &Open Parent Folder..., MENU_ACTION
-	Menu, convert, Add, &Clipboard to File...., MENU_ACTION	
-	Menu, convert, Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
-	Menu, convert, Add, &File to Clipboard..., MENU_ACTION	
+	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION
+	Menu, Explorer..., Add, &Open Page..., MENU_ACTION
+	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION
+	Menu, Explorer..., Add, &Clipboard to File...., MENU_ACTION	
+	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
+	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION	
+	Menu, convert, Add, &Explorer..., :Explorer...
 	Menu, convert, Add, 
-	Menu, convert, Add, &Clean, MENU_ACTION
-	Menu, convert, Add, &RemoveResourceGroups.ps1, MENU_ACTION
-	Menu, convert, Add, &createNewVM.ps1, MENU_ACTION
-	Menu, convert, Add, &{Update NSGS}.ps1, MENU_ACTION		
-	Menu, convert, Add, &getDiskSpace.ps1, MENU_ACTION				
+	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
+	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
+	Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
+	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION		
+	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION				
+	Menu, convert, Add, &Scripts..., :Scripts...
 	Menu,convert, Default, &CapsLock Toggle	
 	Menu, convert, Show
 Return
@@ -263,6 +282,48 @@ Menu_Action(ThisMenuItem, string)
 	; Remove all-dashes
 	Else If ThisMenuItem =Remove-&dashes
 		StringReplace, string, string, -, %A_Space%, All
+	; https://www.autohotkey.com/boards/viewtopic.php?f=6&t=69889&p=301478#p301478
+	; Modify string to remove illegal chars
+	Else If ThisMenuItem =Remove_Illegal_characters
+	{
+		StringLower, string, string
+		string := RegExReplace(string, "[/\\?%*:|<>]", "$u1")
+	}
+	; Modify string to remove emojis
+	Else If ThisMenuItem =&Remove emojis
+	{
+		; string := RegExReplace(string, "[\uD800-\uDFFF]","")
+		string := RegExReplace(string, "\p{C}","")
+	}
+	; Convert phrase separated_by_or-to lowerCamelCase
+	Else If ThisMenuItem =&snake_Case to CamelCase
+	{
+		string := RegExReplace(string, "(([A-Z]+)|(?i)((?<=[a-z])|[a-z])([a-z]*))[ _-]([a-z]|[A-Z]+)", "$L2$L3$4$T5")
+	}	
+	; Wrap text with parentheses
+	Else If ThisMenuItem =&`(...)	
+		string = (%string%)
+	; Wrap text with curly braces
+	Else If ThisMenuItem =&`{...}
+		string = {%string%}
+	; Wrap text with square brackets
+	Else If ThisMenuItem =&`[...]
+		string = [%string%]
+	; Wrap text with angle brackets
+	Else If ThisMenuItem =&`<...>
+		string = <%string%>
+	; Wrap text with angle brackets + octothorpes (block comment)
+	Else If ThisMenuItem =`<&#...#>
+		string = <# %string% #>
+	; Wrap text with slashes + octothorpes (block comment)
+	Else If ThisMenuItem =&`/*...*/
+	string = /* %string% */
+	; Wrap text with single quotes
+	Else If ThisMenuItem =&`'...'
+		string = '%string%'
+	; Wrap text with double quotes
+	Else If ThisMenuItem =&`"..."	
+		string = `"%string%`"
 	; Google the highlighted word
 	Else If ThisMenuItem =&Google
 		Run, http://www.google.com/search?q=%string%
@@ -278,9 +339,9 @@ Menu_Action(ThisMenuItem, string)
 	; If the copied text is a valid folder, open it in Windows Explorer
 	Else If ThisMenuItem =&Open Folder...
 	{
-
+		string := StrReplace(string, "/", "\")
 		if (FileExist(string))
-			Run explorer.exe /select`, %string%
+			Run explorer.exe /select`,%string%
 		else
 		{
 			replacement := RegExReplace(string, "[^\\\/]+[\\\/]?$")
@@ -293,13 +354,13 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&Open Parent Folder...
 	{
 		SplitPath, string,, dir
-		Run explorer.exe /select`, %dir%
+		Run explorer.exe /select`,%dir%
 	}
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
 		Run, %string% 
 	; Run old portable Ccleaner in auto mode
-	Else If ThisMenuItem =&Clean
+	Else If ThisMenuItem =&CCleaner
 		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
 	Else If (ThisMenuItem ="&Copy File Names and Details from Folder to Clipboard...") {
 		; https://lexikos.github.io/v2/docs/FAQ.htm#output
@@ -332,6 +393,17 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&Swap at Anchor Word
 	{
 		string := text_swap(string)
+	}
+	; Convert Tabs to Spaces
+	Else If ThisMenuItem =&Tabs to Spaces
+	{
+		string := TabsToSpaces(string)
+	}
+	Else If ThisMenuItem =&Spaces to Tabs
+	{		
+		; string := StrReplace(string, "    ", "	", , Limit := -1)
+		string := RegExReplace(string, "[\s]{4}", A_Tab)
+		; string := SpacesToTabs(string)
 	}
 	; Copy clipboard contents to a text file in a folder currently open in Windows Explorer
 	Else If ThisMenuItem =&Clipboard to File....
@@ -416,6 +488,53 @@ text_swap(string)
 	this := ""
 	div := ""
 return string
+}
+
+; https://www.autohotkey.com/board/topic/73844-tabs-to-spaces-which-preserves-alignment/
+; Convert Tabs to Spaces
+TabsToSpaces(string, outEOL="`r`n", EOL="`n", Omit="`r"){
+	Loop Parse, string, %EOL%, %Omit%
+	{
+		index := 0
+		Loop Parse, A_LoopField
+		{
+			index++
+			If (A_LoopField = A_Tab){
+				Loop % 4-Mod(index, 4)
+					r .= " "
+				index := -1
+			}
+			else r .= A_LoopField
+			}
+		r .= outEOL
+	}
+	StringTrimRight, r, r, % StrLen(outEOL)
+return r
+}
+
+; Convert Spaces to Tabs
+SpacesToTabs(string, outEOL="`r`n", EOL="`n", Omit="`r"){
+	Loop Parse, string, %EOL%, %Omit%
+	{
+		index := 0
+		spaceCount := 0
+		Loop Parse, A_LoopField
+		{
+			index++
+			If (A_LoopField = A_Space){				
+				spaceCount++
+				If (spaceCount == 4){
+					r .= "	"
+					; index := -1
+					spaceCount := 0
+				}
+			}
+			else r .= A_LoopField
+			}
+		r .= outEOL
+	}
+	StringTrimRight, r, r, % StrLen(outEOL)
+return r
 }
 
 ; Logic to swap text in string using the anchor string at_this
