@@ -153,7 +153,7 @@ showSongInfo(CurrentPlayback)
     artistString .= ", " . CurrentPlayback.Track.artists[index].name
   }
   artistString := substr(artistString,2)
-  songInfo := "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"floor(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"floor(mod(CurrentPlayback.Track.duration/1000,60))
+  songInfo := "Title: " CurrentPlayback.Track.Name " `nArtist: " artistString " `nAlbum: " CurrentPlayback.Track.album.name " `nProgress: " floor(CurrentPlayback.progress_ms/1000/60)":"round(mod(CurrentPlayback.progress_ms/1000,60)) " - " floor(CurrentPlayback.Track.duration/1000/60)":"round(mod(CurrentPlayback.Track.duration/1000,60))
   ToolTip,%songInfo%
   SetTimer,TOOLTIP,On 
 return songInfo
