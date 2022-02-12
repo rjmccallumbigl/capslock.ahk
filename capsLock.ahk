@@ -6,11 +6,8 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 /*
 ***************************************** 
 TODO:
-
-Put file in new subfolder
-Pull file out to parent Folder
 Storage Usage
-Indicate what processes/programs are using this file
+Indicate what processes/programs are using this file (handles)
 
 *******************************************
 */
@@ -123,14 +120,16 @@ MENU:
 	Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
 	Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
 	Menu, Browser Search..., Add, &Define, MENU_ACTION
+	Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
 	Menu, convert, Add, &Browser Search..., :Browser Search...
 	Menu, convert, Add, 
-	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Open Page..., MENU_ACTION
-	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Clipboard to File...., MENU_ACTION	
+	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION	
+	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION	
 	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
-	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION	
+	Menu, Explorer..., Add, &Add File to Subfolder..., MENU_ACTION
+	Menu, Explorer..., Add, &Pull File Out to Parent Folder..., MENU_ACTION
+	Menu, Explorer..., Add, &Clipboard to File...., MENU_ACTION	
+	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION
 	Menu, convert, Add, &Explorer..., :Explorer...
 	Menu, convert, Add, 
 	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
@@ -139,6 +138,12 @@ MENU:
 	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION		
 	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION				
 	Menu, convert, Add, &Scripts..., :Scripts...
+	Menu, convert, Add, 
+	Menu, TimeDate, Add, Time/Date, MENU_ACTION
+	Menu, TimeDate, DeleteAll
+	List := DateFormats(A_Now)
+	TextMenuDate(List,"TimeDate","DateAction")
+	Menu, convert, Add, &Insert Time/Date, :TimeDate
 	Menu,convert, Default, &CapsLock Toggle	
 	Menu, convert, Show
 Return
@@ -415,6 +420,22 @@ Menu_Action(ThisMenuItem, string)
 		string := RegExReplace(string, "[\s]{4}", A_Tab)
 		; string := SpacesToTabs(string)
 	}
+	; Create a new subfolder, add file to it
+	Else If ThisMenuItem =&Add File to Subfolder...
+	{
+		SplitPath, string, , dir, , nameNoExt
+		FileCreateDir, %nameNoExt%
+		FileMove, %string%, %nameNoExt%
+	}
+
+	; Take file out of current folder and add to parent folder
+	Else If ThisMenuItem =&Pull File Out to Parent Folder...
+	{
+		SplitPath, string,, dir
+		SplitPath, dir,, dir2
+		FileMove, %string%, %dir2%
+	}
+
 	; Copy clipboard contents to a text file in a folder currently open in Windows Explorer
 	Else If ThisMenuItem =&Clipboard to File....
 	{
@@ -571,6 +592,58 @@ ExplorerPath(_hwnd)
 		return replace
 	}
 }
+
+; https://www.computoredge.com/AutoHotkey/Downloads/QuickLinksTimeDateSubMenuSwitch.ahk
+; Creates string of formatted dates
+DateFormats(Date)
+{
+	FormatTime, OutputVar , %Date%, h:mm tt ;12 hour clock
+	List := OutputVar
+	FormatTime, OutputVar , %Date%, HH:mm ;24 hour clock
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar , %Date%, ShortDate ; 11/5/2015
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar , %Date%, MMM. d, yyyy
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar , %Date%, MMMM d, yyyy
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar , %Date%, LongDate
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar, %Date%, h:mm tt, dddd, MMMM d, yyyy
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar, %Date%, dddd MMMM d, yyyy hh:mm:ss tt
+	List := List . "~" . OutputVar
+	FormatTime, OutputVar, %Date%, ddd_MM-dd-yyyy_hh-mmtt_EST
+	List := List . "~" . OutputVar
+Return List
+}
+
+; https://www.computoredge.com/AutoHotkey/Downloads/QuickLinksTimeDateSubMenuSwitch.ahk
+; Creates DateTime Submenu
+TextMenuDate(TextOptions,Menu,Action)
+{
+	StringSplit, MenuItems, TextOptions , ~
+	Loop %MenuItems0%
+	{
+		Item := MenuItems%A_Index%
+		Menu, %Menu%, add, %Item%, %Action%
+		Switch 
+		{
+		Case (InStr(Item,":") and InStr(Item,"`,")):
+			Menu, TimeDate, Icon, %Item%, %A_Windir%\System32\timedate.cpl
+		Case (InStr(Item,":")):
+			Menu, TimeDate, Icon, %Item%, %A_Windir%\System32\shell32.dll, 240
+		Default:
+			Menu, TimeDate, Icon, %Item%, %A_Windir%\System32\ieframe.dll, 46
+		}
+	}
+}
+
+; https://www.computoredge.com/AutoHotkey/Downloads/QuickLinksTimeDateSubMenuSwitch.ahk
+; DateTime submenu action
+DateAction:
+	SendInput %A_ThisMenuItem%{Raw}%A_EndChar%
+Return
 
 ; Exit app
 QUIT:
