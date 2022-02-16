@@ -6,6 +6,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 /*
 ***************************************** 
 TODO:
+Insert time menu to insert xx:xx time for diff timezones
 Storage Usage
 Indicate what processes/programs are using this file (handles)
 
@@ -144,6 +145,7 @@ MENU:
 	List := DateFormats(A_Now)
 	TextMenuDate(List,"TimeDate","DateAction")
 	Menu, convert, Add, &Insert Time/Date, :TimeDate
+	Menu, convert, Add, &Insert Specified Time, MENU_ACTION
 	Menu,convert, Default, &CapsLock Toggle	
 	Menu, convert, Show
 Return
@@ -447,6 +449,11 @@ Menu_Action(ThisMenuItem, string)
 		file.Write(string "`n")
 		file.Close()
 	}
+	; Convert time and paste string in different time zones
+	Else If ThisMenuItem =&Insert Specified Time
+	{
+		string := timeConversion(string)
+	}
 Return string
 }
 
@@ -519,6 +526,52 @@ text_swap(string)
 	this := ""
 	div := ""
 return string
+}
+
+; Convert the time
+timeConversion(string)
+{
+	If string is not time
+	{
+		string := A_NowUTC
+	} else {
+		string := DateParse(string)
+	}
+	backupString := string
+	estObject := time("America/New_York")
+	cstObject := time("America/Chicago")
+	pstObject := time("PST8PDT")
+	estOffset := estObject.utc_offset
+	cstOffset := cstObject.utc_offset
+	pstOffset := pstObject.utc_offset
+	istOffset := "05:30"
+
+	string += estOffset, hours
+	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	stringTime := OutputVar . " EST ["
+	string := backupString
+
+	string += cstOffset, hours
+	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	stringTime := stringTime . OutputVar . " CST | "
+	string := backupString
+
+	string += pstOffset, hours
+	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	stringTime := stringTime . OutputVar . " PST | "
+	string := backupString
+
+	string += istOffset, hours
+	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	stringTime := stringTime . OutputVar . " IST]"
+	string := backupString
+
+	; stringTime := string
+	; stringTime += "`n"
+	; stringTime += estOffset, hours
+	; stringTime += "`n"
+
+return stringTime
 }
 
 ; https://www.autohotkey.com/board/topic/73844-tabs-to-spaces-which-preserves-alignment/
@@ -611,7 +664,7 @@ DateFormats(Date)
 	List := List . "~" . OutputVar
 	FormatTime, OutputVar, %Date%, h:mm tt, dddd, MMMM d, yyyy
 	List := List . "~" . OutputVar
-	FormatTime, OutputVar, %Date%, dddd MMMM d, yyyy hh:mm:ss tt
+	FormatTime, OutputVar, %Date%, dddd, MMMM d, yyyy @ hh:mm:ss tt
 	List := List . "~" . OutputVar
 	FormatTime, OutputVar, %Date%, ddd_MM-dd-yyyy_hh-mmtt_EST
 	List := List . "~" . OutputVar
@@ -644,6 +697,75 @@ TextMenuDate(TextOptions,Menu,Action)
 DateAction:
 	SendInput %A_ThisMenuItem%{Raw}%A_EndChar%
 Return
+
+; https://www.autohotkey.com/boards/viewtopic.php?t=95931
+; Return time object from API
+time(area) {
+	WinHttp := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	WinHttp.Open("GET", "http://worldtimeapi.org/api/timezone/" area, false), WinHttp.Send()
+	timeObject := JsonToAHK(WinHttp.ResponseText) 
+Return timeObject
+}
+
+; https://www.autohotkey.com/boards/viewtopic.php?t=67583
+; Convert JSON to AHK object
+JsonToAHK(json, rec := false) { 
+	static doc := ComObjCreate("htmlfile") 
+	, __ := doc.write("<meta http-equiv=""X-UA-Compatible"" content=""IE=9"">") 
+	, JS := doc.parentWindow 
+	if !rec 
+		obj := %A_ThisFunc%(JS.eval("(" . json . ")"), true) 
+	else if !IsObject(json) 
+		obj := json 
+	else if JS.Object.prototype.toString.call(json) == "[object Array]" { 
+		obj := [] 
+		Loop % json.length 
+			obj.Push( %A_ThisFunc%(json[A_Index - 1], true) ) 
+	} 
+	else { 
+		obj := {} 
+		keys := JS.Object.keys(json) 
+		Loop % keys.length { 
+			k := keys[A_Index - 1] 
+			obj[k] := %A_ThisFunc%(json[k], true) 
+		} 
+	} 
+Return obj 
+} 
+return
+
+; https://www.autohotkey.com/board/topic/18760-date-parser-convert-any-date-format-to-yyyymmddhh24miss
+; Convert date string to date object
+DateParse(str, americanOrder=0) {
+	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*"
+	, dayAndMonth := "(?:(\d{1,2}|" . monthNames . ")[\s\.\-\/,]+)?(\d{1,2}|" . monthNames . ")"
+	If RegExMatch(str, "i)^\s*(?:(\d{4})([\s\-:\/])(\d{1,2})\2(\d{1,2}))?"
+			. "(?:\s*[T\s](\d{1,2})([\s\-:\/])(\d{1,2})(?:\6(\d{1,2})\s*(?:(Z)|(\+|\-)?"
+	. "(\d{1,2})\6(\d{1,2})(?:\6(\d{1,2}))?)?)?)?\s*$", i) ;ISO 8601 timestamps
+	year := i1, month := i3, day := i4, t1 := i5, t2 := i7, t3 := i8
+	Else If !RegExMatch(str, "^\W*(\d{1,2}+)(\d{2})\W*$", t){
+		RegExMatch(str, "i)(\d{1,2})"					;hours
+			. "\s*:\s*(\d{1,2})"				;minutes
+			. "(?:\s*:\s*(\d{1,2}))?"			;seconds
+		. "(?:\s*([ap]m))?", t)				;am/pm
+		StringReplace, str, str, %t%
+		If Regexmatch(str, "i)(\d{4})[\s\.\-\/,]+" . dayAndMonth, d) ;2004/22/03
+			year := d1, month := d3, day := d2
+		Else If Regexmatch(str, "i)" . dayAndMonth . "[\s\.\-\/,]+(\d{2,4})", d) ;22/03/2004 or 22/03/04
+			year := d3, month := d2, day := d1
+		If (RegExMatch(day, monthNames) or americanOrder and !RegExMatch(month, monthNames)) ;try to infer day/month order
+			tmp := month, month := day, day := tmp
+	}
+	f = %A_FormatFloat%
+	SetFormat, Float, 02.0
+	d := (StrLen(year) == 2 ? "20" . year : (year ? year : A_YYYY))
+	. ((month := month + 0 ? month : InStr(monthNames, SubStr(month, 1, 3)) // 4 ) > 0 ? month + 0.0 : A_MM)
+	. ((day += 0.0) ? day : A_DD) 
+	. t1 + (t1 == 12 ? t4 = "am" ? -12.0 : 0.0 : t4 = "pm" ? 12.0 : 0.0)
+	. t2 + 0.0 . t3 + 0.0
+	SetFormat, Float, %f%
+return, d
+}
 
 ; Exit app
 QUIT:
