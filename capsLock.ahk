@@ -6,12 +6,20 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 /*
 ***************************************** 
 TODO:
-Insert time menu to insert xx:xx time for diff timezones
+PowerShell Select-String/grep xyz in folder
 Storage Usage
 Indicate what processes/programs are using this file (handles)
 
 *******************************************
 */
+Gui, Add, DateTime, vMyEdit gformatDates choose%A_NowUTC%, MMM. d @ h:mmtt 'UTC'
+Gui, Add, Edit, w200 vDate1
+Gui, Add, Edit, w200 vDate2
+Gui, Add, Edit, w200 vDate3
+Gui, Add, Edit, w200 vDate4
+Gui, Add, Button, , &Send All to Clipboard
+Gui, Add, Button, Default, &Convert Time
+Gui +MinimizeBox
 
 About =
 (LTrim0
@@ -24,6 +32,11 @@ SetTimer,TOOLTIP,Off
 TimeCapsToggle = 5
 TimeOut = 30
 global string2 := ""
+; global vDate1
+; global vDate2
+; global vDate3
+; global vDate4
+; global vMyEdit
 
 ; Define hotstring, trigger via hold CapsLock for 1.5s or hold Right Click + Middle click
 CapsLock::
@@ -452,10 +465,80 @@ Menu_Action(ThisMenuItem, string)
 	; Convert time and paste string in different time zones
 	Else If ThisMenuItem =&Insert Specified Time
 	{
-		string := timeConversion(string)
+
+		Gui, +LastFound
+		Gui, Show
+		GuiHWND := WinExist() 
+		WinWaitClose, ahk_id %GuiHWND% 
+		; string := buildTimeConversionGUI()
+		string := ButtonSendAlltoClipboard()
+		; string := timeConversion(string)
 	}
 Return string
 }
+
+; Return one line time conversion string
+ButtonSendAlltoClipboard(){
+	global dateEST
+	global datePST
+	global dateUTC
+	global dateIST
+	string := dateEST . " [" . datePST . " | " . dateUTC . " | " . dateIST . "]"
+	; ExitApp
+return string
+}
+
+ButtonConvertTime:
+formatDates:
+	; MyEdit:
+	; clearText()
+	GuiControlGet, MyEdit
+	; Msgbox,%A_GuiControl%
+	; utcTime := A_NowUTC
+	utcTime := MyEdit
+	backupString := utcTime
+	; estObject := time("America/New_York")
+	; pstObject := time("PST8PDT")
+	; estOffset := estObject.utc_offset
+	estOffset := -5
+	; pstOffset := pstObject.utc_offset
+	pstOffset := -8
+	istOffset := 5.5
+	FormatTime, dateUTC, %utcTime%, MMM. d @ h:mmtt UTC
+	GuiControl, Text, Date1, %dateUTC%
+	utcTime += estOffset, hours
+	FormatTime, dateEST, %utcTime%, MMM. d @ h:mmtt EST
+	GuiControl, Text, Date2, %dateEST%
+	utcTime := backupString
+
+	utcTime += pstOffset, hours
+	FormatTime, datePST, %utcTime%, MMM. d @ h:mmtt PST
+	GuiControl, Text, Date3, %datePST%
+	utcTime := backupString
+
+	utcTime += istOffset, hours
+	FormatTime, dateIST, %utcTime%, MMM. d @ h:mmtt IST
+	GuiControl, Text, Date4, %dateIST%
+	utcTime := backupString
+
+	; clearText()
+	; string := ButtonSendAlltoClipboard(dateEST, datePST, dateUTC, dateIST)
+return
+
+; Empty text fields
+; clearText(){
+; 	GuiControl, Text, Date1, 
+; 	GuiControl, Text, Date2, 
+; 	GuiControl, Text, Date3, 
+; 	GuiControl, Text, Date4, 
+; return
+; }
+
+; Exit
+; GuiEscape:
+; GuiClose:
+; ButtonCancel:
+; ExitApp
 
 ; N/A
 EMPTY:
@@ -531,40 +614,49 @@ return string
 ; Convert the time
 timeConversion(string)
 {
-	If string is not time
-	{
-		string := A_NowUTC
-	} else {
-		string := DateParse(string)
-	}
-	backupString := string
-	estObject := time("America/New_York")
-	cstObject := time("America/Chicago")
-	pstObject := time("PST8PDT")
-	estOffset := estObject.utc_offset
-	cstOffset := cstObject.utc_offset
-	pstOffset := pstObject.utc_offset
-	istOffset := "05:30"
 
-	string += estOffset, hours
-	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	stringTime := OutputVar . " EST ["
-	string := backupString
+	; 	; string := DateParse(string)
+	; 	; stringOfTime := A_NowUTC
+	; 	; MsgBox, %string%
+	; 	; stll := StrLen(string)
+	; 	; MsgBox, %stll%
 
-	string += cstOffset, hours
-	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	stringTime := stringTime . OutputVar . " CST | "
-	string := backupString
+	; 	; timeString := DateParse(string)
+	; 	; if (string is String) {
+	; 	; 	string := A_NowUTC
+	; 	; }
+	; 	; else if (timeString is time){
+	; 	; 	string := timeString
+	; 	; } else {
+	; 	; 	string := A_NowUTC
+	; 	; }
 
-	string += pstOffset, hours
-	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	stringTime := stringTime . OutputVar . " PST | "
-	string := backupString
+	; string := A_NowUTC
 
-	string += istOffset, hours
-	FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	stringTime := stringTime . OutputVar . " IST]"
-	string := backupString
+	; backupString := string
+	; estObject := time("America/New_York")
+	; pstObject := time("PST8PDT")
+	; estOffset := estObject.utc_offset
+	; pstOffset := pstObject.utc_offset
+	; istOffset := "05:30"
+
+	; string += estOffset, hours
+	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	; stringTime := OutputVar . " EST ["
+	; string := backupString
+
+	; string += pstOffset, hours
+	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	; stringTime := stringTime . OutputVar . " PST | "
+	; string := backupString
+
+	; string += istOffset, hours
+	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
+	; stringTime := stringTime . OutputVar . " IST | "
+	; string := backupString
+
+	; FormatTime, OutputVar, %string%, MMM. d @ HH:mm
+	; stringTime := stringTime . OutputVar . " UTC]"
 
 	; stringTime := string
 	; stringTime += "`n"
@@ -737,27 +829,38 @@ return
 ; https://www.autohotkey.com/board/topic/18760-date-parser-convert-any-date-format-to-yyyymmddhh24miss
 ; Convert date string to date object
 DateParse(str, americanOrder=0) {
-	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*"
-	, dayAndMonth := "(?:(\d{1,2}|" . monthNames . ")[\s\.\-\/,]+)?(\d{1,2}|" . monthNames . ")"
-	If RegExMatch(str, "i)^\s*(?:(\d{4})([\s\-:\/])(\d{1,2})\2(\d{1,2}))?"
-			. "(?:\s*[T\s](\d{1,2})([\s\-:\/])(\d{1,2})(?:\6(\d{1,2})\s*(?:(Z)|(\+|\-)?"
-	. "(\d{1,2})\6(\d{1,2})(?:\6(\d{1,2}))?)?)?)?\s*$", i) ;ISO 8601 timestamps
-	year := i1, month := i3, day := i4, t1 := i5, t2 := i7, t3 := i8
+	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-zA-Z]*"
+	, dayAndMonth := "(\d{1,2})[^a-zA-Z0-9:.]+(\d{1,2})"
+	, dayAndMonthName := "(?:(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Day>\d{1,2})[^a-zA-Z0-9]+|(?<Day>\d{1,2})[^a-zA-Z0-9:.]*(?<Month>" . monthNames . "))"
+	, monthNameAndYear := "(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Year>(?:\d{4}|\d{2}))"
+	If RegExMatch(str, "i)^\s*(?:(\d{4})([\s\-:\/])(\d{1,2})\2(\d{1,2}))?(?:\s*[T\s](\d{1,2})([\s\-:\/])(\d{1,2})(?:\6(\d{1,2})\s*(?:(Z)|(\+|\-)?(\d{1,2})\6(\d{1,2})(?:\6(\d{1,2}))?)?)?)?\s*$", i) ;ISO 8601 timestamps
+		year := i1, month := i3, day := i4, t1 := i5, t2 := i7, t3 := i8
 	Else If !RegExMatch(str, "^\W*(\d{1,2}+)(\d{2})\W*$", t){
 		RegExMatch(str, "i)(\d{1,2})"					;hours
 			. "\s*:\s*(\d{1,2})"				;minutes
 			. "(?:\s*:\s*(\d{1,2}))?"			;seconds
 		. "(?:\s*([ap]m))?", t)				;am/pm
 		StringReplace, str, str, %t%
-		If Regexmatch(str, "i)(\d{4})[\s\.\-\/,]+" . dayAndMonth, d) ;2004/22/03
-			year := d1, month := d3, day := d2
-		Else If Regexmatch(str, "i)" . dayAndMonth . "[\s\.\-\/,]+(\d{2,4})", d) ;22/03/2004 or 22/03/04
-			year := d3, month := d2, day := d1
-		If (RegExMatch(day, monthNames) or americanOrder and !RegExMatch(month, monthNames)) ;try to infer day/month order
-			tmp := month, month := day, day := tmp
+		if RegExMatch(str, "Ji)" . dayAndMonthName . "[^a-zA-Z0-9]*(?<Year>(?:\d{4}|\d{2}))?", d) ; named month eg 22May14; May 14, 2014; 22May, 2014
+			year := dYear, month := dMonth, day := dDay
+		else if Regexmatch(str, "i)" . monthNameAndYear, d) ; named month and year without day eg May14; May 2014
+			year := dYear, month := dMonth
+		else {
+			If Regexmatch(str, "i)(\d{4})[^a-zA-Z0-9:.]+" . dayAndMonth, d) ;2004/22/03
+				year := d1, month := d3, day := d2
+			Else If Regexmatch(str, "i)" . dayAndMonth . "(?:[^a-zA-Z0-9:.]+((?:\d{4}|\d{2})))?", d) ;22/03/2004 or 22/03/04
+				year := d3, month := d2, day := d1
+			If (RegExMatch(day, monthNames) or americanOrder and !RegExMatch(month, monthNames) or (month > 12 and day <= 12)) ;try to infer day/month order
+				tmp := month, month := day, day := tmp
+		}
 	}
 	f = %A_FormatFloat%
 	SetFormat, Float, 02.0
+	if (day or month or year) and not (day and month and year) ; partial date
+		if not month or not (day or month) or (t1 and not day) ; partial date must have month and day with time or day or year without time
+		return
+	else if not day ; without time use 1st for day if not present
+		day := 1
 	d := (StrLen(year) == 2 ? "20" . year : (year ? year : A_YYYY))
 	. ((month := month + 0 ? month : InStr(monthNames, SubStr(month, 1, 3)) // 4 ) > 0 ? month + 0.0 : A_MM)
 	. ((day += 0.0) ? day : A_DD) 
