@@ -1,42 +1,48 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
-; Source/Inspiration https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
 
 /*
 ***************************************** 
-TODO:
-PowerShell Select-String/grep xyz in folder
-Storage Usage
-Indicate what processes/programs are using this file (handles)
+ *
+ * DESCRIPTION
+ * Slows down and extends the CAPSLOCK key. Based on CAPSHIFT.
+ *
+ * SOURCE
+ * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
+ *
+ * TODO
+ *	Storage Usage
+ *	Indicate what processes/programs are using this file (handles)
 
 *******************************************
 */
-Gui, Add, DateTime, vMyEdit gformatDates choose%A_NowUTC%, MMM. d @ h:mmtt 'UTC'
-Gui, Add, Edit, w200 vDate1
-Gui, Add, Edit, w200 vDate2
-Gui, Add, Edit, w200 vDate3
-Gui, Add, Edit, w200 vDate4
-Gui, Add, Button, , &Send All to Clipboard
-Gui, Add, Button, Default, &Convert Time
-Gui +MinimizeBox
-
-About =
-(LTrim0
-	Slows down and extends the capslock key. Hold for 0.05 sec to toggle capslock on or off. Hold for 0.3 sec to show a menu that converts selected text to UPPER CASE, lower case, Title Case, iNVERT cASE, etc. Also can trigger via Right Click + Middle Click.
-	)
 
 ; Declare variables
 SetTimer,TOOLTIP,1500
 SetTimer,TOOLTIP,Off
 TimeCapsToggle = 5
 TimeOut = 30
-global string2 := ""
-; global vDate1
-; global vDate2
-; global vDate3
-; global vDate4
-; global vMyEdit
+global stringGlobal := ""
+
+; Build GUI in case we use the Insert Specified Time function
+Gui, Add, DateTime, vutcTime gformatDates choose%A_NowUTC%, MMM. d @ h:mmtt 'UTC'
+Gui, Add, Edit, w200 vDate1
+Gui, Add, Edit, w200 vDate2
+Gui, Add, Edit, w200 vDate3
+Gui, Add, Edit, w200 vDate4
+Gui, Add, Button, Default, &OK
+Gui +MinimizeBox
+
+; Enable mousewheel in AutoHotkey GUIs
+#If MouseIsOver("ahk_class AutoHotkeyGUI")
+	WheelUp::Send {Up}
+WheelDown::Send {Down}
+#If
+MouseIsOver(WinTitle){
+	MouseGetPos,,, Win
+	Return WinExist(WinTitle . " ahk_id " . Win)
+}
 
 ; Define hotstring, trigger via hold CapsLock for 1.5s or hold Right Click + Middle click
 CapsLock::
@@ -48,7 +54,7 @@ CapsLock::
 	{
 		Sleep, 10
 		counter += 1
-		Progress, %counter% ;, SubText, MainText, WinTitle, FontName
+		Progress, %counter%
 		If (counter = TimeCapsToggle)
 			Progress, ZH16 ZX0 ZY0 B R0-%TimeOut% CBFF0000
 		if (A_ThisHotkey = "CapsLock")
@@ -73,8 +79,8 @@ CapsLock::
 		Gosub, CapsLock_State_Toggle
 	}
 
-	if (string2){
-		clipboard := string2
+	if (stringGlobal){
+		clipboard := stringGlobal
 	} else {
 		Clipboard := OldClipboard
 	}
@@ -85,12 +91,9 @@ MENU:
 	Winget, Active_Window, ID, A
 	Send, ^c
 	ClipWait, 1
+	; Default string manipulation
 	Menu, convert, Add
 	Menu, convert, Delete
-	Menu, misc, Add, &About, ABOUT
-	Menu, misc, Add, &Quit, QUIT
-	Menu, convert, Add, CAPshift, :misc
-	Menu, convert, Add, 	
 	Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle
 	If (GetKeyState("CapsLock", "T") = True)
 		Menu,Convert,Check, &CapsLock Toggle
@@ -106,6 +109,7 @@ MENU:
 	Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
 	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION	
 	Menu, convert, Add, 
+	; Advanced string manipulation
 	Menu, Modify Text..., Add, Remove_&under_scores, MENU_ACTION
 	Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
 	Menu, Modify Text..., Add, Remove-&dashes, MENU_ACTION
@@ -120,6 +124,7 @@ MENU:
 	Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
 	Menu, convert, Add, &Modify Text..., :Modify Text...
 	Menu, convert, Add,
+	; Wrap text (coding)
 	Menu, Wrap Text..., Add, &`(...), MENU_ACTION
 	Menu, Wrap Text..., Add, &`{...}, MENU_ACTION
 	Menu, Wrap Text..., Add, &`[...], MENU_ACTION
@@ -130,6 +135,7 @@ MENU:
 	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
 	Menu, convert, Add, &Wrap Text..., :Wrap Text...
 	Menu, convert, Add, 
+	; Utilize internet browser
 	Menu, Browser Search..., Add, &Google, MENU_ACTION
 	Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
 	Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
@@ -137,24 +143,29 @@ MENU:
 	Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
 	Menu, convert, Add, &Browser Search..., :Browser Search...
 	Menu, convert, Add, 
+	; Utilize Windows Explorer
 	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION	
 	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION	
 	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
 	Menu, Explorer..., Add, &Add File to Subfolder..., MENU_ACTION
 	Menu, Explorer..., Add, &Pull File Out to Parent Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Clipboard to File...., MENU_ACTION	
+	Menu, Explorer..., Add, &Clipboard to File..., MENU_ACTION	
 	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION
 	Menu, convert, Add, &Explorer..., :Explorer...
 	Menu, convert, Add, 
+	; Run scripts
+	Menu, Scripts..., Add, &Alex, MENU_ACTION
 	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
-	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
+	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION	
 	Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
 	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION		
-	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION				
+	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION		
+	Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION			
 	Menu, convert, Add, &Scripts..., :Scripts...
 	Menu, convert, Add, 
+	; Insert/modify datetime strings
 	Menu, TimeDate, Add, Time/Date, MENU_ACTION
-	Menu, TimeDate, DeleteAll
+	Menu, TimeDate, DeleteAll 
 	List := DateFormats(A_Now)
 	TextMenuDate(List,"TimeDate","DateAction")
 	Menu, convert, Add, &Insert Time/Date, :TimeDate
@@ -169,7 +180,7 @@ MENU_ACTION:
 	string = %clipboard%
 	clipboard := Menu_Action(A_ThisMenuItem, string)
 	WinActivate, ahk_id %Active_Window%
-	If (!string2){
+	If (!stringGlobal){
 		Send, ^v
 	}
 	ToolTip, %A_ThisMenuItem%
@@ -211,6 +222,7 @@ Menu_Action(ThisMenuItem, string)
 		string := newString
 		StringCaseSense, Off
 	}
+
 	; Add extra spaces between every character except spaces and punctuation
 	Else If ThisMenuItem =&S p r e a d T e x t
 	{
@@ -227,6 +239,7 @@ Menu_Action(ThisMenuItem, string)
 		}
 		string := newString
 	}	
+
 	; Convert to iNVERT cASE
 	Else If ThisMenuItem =&iNVERT cASE
 	{
@@ -294,15 +307,19 @@ Menu_Action(ThisMenuItem, string)
 		}
 		StringCaseSense, Off
 	}
+
 	; Remove under_scores
 	Else If ThisMenuItem =Remove_&under_scores
 		StringReplace, string, string, _, %A_Space%, All
+
 	; Remove periods.from.text
 	Else If ThisMenuItem =Remove.&full.stops
 		StringReplace, string, string, ., %A_Space%, All
+
 	; Remove all-dashes
 	Else If ThisMenuItem =Remove-&dashes
 		StringReplace, string, string, -, %A_Space%, All
+
 	; https://www.autohotkey.com/boards/viewtopic.php?f=6&t=69889&p=301478#p301478
 	; Modify string to remove illegal chars
 	Else If ThisMenuItem =Remove_Illegal_characters
@@ -316,56 +333,73 @@ Menu_Action(ThisMenuItem, string)
 		; string := RegExReplace(string, "[\uD800-\uDFFF]","")
 		string := RegExReplace(string, "\p{C}","")
 	}
+
 	; Return lowercase chars
 	Else If ThisMenuItem =Remove &Uppercase
 		string := RegExReplace(string, "[A-Z]","")
+
 	; Return uppercase chars
 	Else If ThisMenuItem =Remove &Lowercase
 		string := RegExReplace(string, "[a-z]","")
+
 	; Sort the string 
 	Else If ThisMenuItem =&`Sort
 		Sort, string
-	; Convert phrase separated_by_or-to lowerCamelCase
+
+	; Convert phrase separated by_or-to lowerCamelCase
 	Else If ThisMenuItem =&snake_Case to CamelCase
 	{
 		string := RegExReplace(string, "(([A-Z]+)|(?i)((?<=[a-z])|[a-z])([a-z]*))[ _-]([a-z]|[A-Z]+)", "$L2$L3$4$T5")
 	}	
+
 	; Wrap text with parentheses
 	Else If ThisMenuItem =&`(...)	
 		string = (%string%)
+
 	; Wrap text with curly braces
 	Else If ThisMenuItem =&`{...}
 		string = {%string%}
+
 	; Wrap text with square brackets
 	Else If ThisMenuItem =&`[...]
 		string = [%string%]
+
 	; Wrap text with angle brackets
 	Else If ThisMenuItem =&`<...>
 		string = <%string%>
+
 	; Wrap text with angle brackets + octothorpes (block comment)
 	Else If ThisMenuItem =`<&#...#>
 		string = <# %string% #>
+
 	; Wrap text with slashes + octothorpes (block comment)
 	Else If ThisMenuItem =&`/*...*/
 	string = /* %string% */
+
 	; Wrap text with single quotes
 	Else If ThisMenuItem =&`'...'
 		string = '%string%'
+
 	; Wrap text with double quotes
 	Else If ThisMenuItem =&`"..."	
 		string = `"%string%`"
+
 	; Google the highlighted word
 	Else If ThisMenuItem =&Google
 		Run, http://www.google.com/search?q=%string%
+
 	; Looks the highlighted word up in a thesaurus
 	Else If ThisMenuItem =&Thesaurus
 		Run, http://www.thesaurus.com/browse/%string%
+
 	; Looks the highlighted word up in Wiki
 	Else If ThisMenuItem =&Wikipedia
 		Run, https://en.wikipedia.org/wiki/%string% 
+
 	; Defines the highlighted word
 	Else If ThisMenuItem =&Define
 		Run, http://www.google.com/search?q=define+%string%
+
 	; If the copied text is a valid folder, open it in Windows Explorer
 	Else If ThisMenuItem =&Open Folder...
 	{
@@ -380,62 +414,147 @@ Menu_Action(ThisMenuItem, string)
 			Run explorer.exe %subString%
 		}
 	}
+
 	; If the copied text is a valid file, open the parent folder in Windows Explorer and highlight the file
 	Else If ThisMenuItem =&Open Parent Folder...
 	{
 		SplitPath, string,, dir
 		Run explorer.exe /select`,%dir%
 	}
+
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
 		Run, %string% 
-	; Run old portable Ccleaner in auto mode
+
+	; Run old portable CCleaner 5.87 in auto mode
 	Else If ThisMenuItem =&CCleaner
 		Run, "D:\OneDrive\APPS\CCleaner\CCleaner.exe" /auto
+
+	; Use CMD to save open folder contents to clipboard
 	Else If (ThisMenuItem ="&Copy File Names and Details from Folder to Clipboard...") {
 		; https://lexikos.github.io/v2/docs/FAQ.htm#output
 		SplitPath, string, , dir
-		string2Temp := dir . "\string2.txt"
-		RunWait %comspec% ' "/c dir "%dir%" /a /o /q /t > "%string2Temp%" "', , hide
-		string2File := FileOpen(string2Temp, "rw")
-		string2 := string2File.Read()
-		string2File.Close()
-		FileDelete, %string2Temp%
+		stringGlobalTemp := dir . "\stringGlobal.txt"
+		RunWait %comspec% ' "/c dir "%dir%" /a /o /q /t > "%stringGlobalTemp%" "', , hide
+		stringGlobalFile := FileOpen(stringGlobalTemp, "rw")
+		stringGlobal := stringGlobalFile.Read()
+		stringGlobalFile.Close()
+		FileDelete, %stringGlobalTemp%
 	}
+
+	; Save file contents to clipboard
 	Else If (ThisMenuItem ="&File to Clipboard..."){
 		file := FileOpen(string, "r")	
-		string2 := File.Read()
+		stringGlobal := File.Read()
 		file.Close()
 	}
+
+	; Run grepFolder.ps1 script
+	Else If ThisMenuItem =&grepFolder.ps1
+	{
+
+		; grep.ps1
+		;###########################
+		; 		# Greps a string after specifying a path to one or more locations. Wildcards are permitted.
+
+		; param (	
+		; 	[Parameter(Mandatory = $true,		
+		; 		ValueFromPipeline = $true,
+		; 		ValueFromPipelineByPropertyName = $true,
+		; 		HelpMessage = "Path to one or more locations.")]
+		; 	[ValidateNotNullOrEmpty()]
+		; 	[SupportsWildcards()]
+		; 	[string[]]
+		; 	$path
+		; )
+
+		; $pattern = Read-Host -Prompt "Enter query:"
+		; Write-Output "Path: $($path)"
+		; Write-Output "Pattern: $($pattern)"
+		; Select-String -Pattern $pattern -Path "$($path)\*" -Include *.*
+
+		;###########################
+
+		WinGet, WinID, ID, ahk_class CabinetWClass
+		CurrentPath := ExplorerPath(WinID)
+		Run, powershell -NoExit -Command "'D:\Dropbox\code\grep.ps1' -path %CurrentPath%"
+		stringGlobal := string
+	}
+
 	; Run getDiskSpace.ps1 script
 	Else If ThisMenuItem =&getDiskSpace.ps1
+	{
+		; getDiskSpace.ps1
+		;###########################
+		; # Get disk space
+		; Get-CimInstance -ClassName Win32_LogicalDisk
+
+		; Get-CimInstance -Class CIM_LogicalDisk | Select-Object @{Name = "Size(GB)"; Expression = { $_.size / 1gb } }, @{Name = "Free Space(GB)"; Expression = { $_.freespace / 1gb } }, @{Name = "Free (%)"; Expression = { "{0,6:P0}" -f (($_.freespace / 1gb) / ($_.size / 1gb)) } }, DeviceID, DriveType | Where-Object DriveType -EQ '3'
+		;###########################
 		Run, powershell -NoExit -File "D:\Dropbox\code\getDiskSpace.ps1"
+		stringGlobal := string
+	}
+
 	; Run RemoveResourceGroups.ps1 script
 	Else If ThisMenuItem =&RemoveResourceGroups.ps1
+	{
+		; RemoveResourceGroups.ps1
+		;###########################
+		; https://github.com/rjmccallumbigl/Powershell/blob/master/Remove-ResourceGroupsAsyncWithPattern.ps1
+		;###########################
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\byronbayer\Powershell\Remove-ResourceGroupsAsyncWithPattern.ps1"
+		stringGlobal := string
+	}		
+
 	; Run createNewVM.ps1 script
 	Else If ThisMenuItem =&createNewVM.ps1
+	{
+		; createNewVM.ps1
+		;###########################
+		; https://github.com/rjmccallumbigl/Azure-PowerShell---Create-New-VM
+		;###########################
 		Run, C:\Users\rymccall\GitHub\Azure-PowerShell---Create-New-VM\createNewVM.ps1
+		stringGlobal := string
+	}		
+
 	; Run {Update NSGS}.ps1 script
 	Else If ThisMenuItem =&{Update NSGS}.ps1
+	{
+		; Update your NSGs with a rule scoped to your IP address.ps1
+		;###########################
+		; https://github.com/rjmccallumbigl/Azure-PowerShell---Add-RDP-rule-to-your-NSGs-with-a-rule-scoped-to-your-IP-address
+		;###########################
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\Update your NSGs with a rule scoped to your IP address.ps1"
+		stringGlobal := string
+	}
+
+	; Run Alex to check string for insensitivity (requires Node support)
+	; https://github.com/get-alex/alex
+	Else If ThisMenuItem =&Alex
+	{
+		Run, powershell -NoExit -Command """%string%""" | npx alex --stdin"
+		stringGlobal := string
+	}
 	; Type what the anchor word is and swap the text on the opposite sides
 	Else If ThisMenuItem =&Swap at Anchor Word
 	{
 		string := text_swap(string)
 	}
+
 	; Convert Tabs to Spaces
 	Else If ThisMenuItem =&Tabs to Spaces
 	{
 		string := TabsToSpaces(string)
 	}
+
+	; Convert Spaces to Tabs
 	Else If ThisMenuItem =&Spaces to Tabs
 	{		
-		; string := StrReplace(string, "    ", "	", , Limit := -1)
 		string := RegExReplace(string, "[\s]{4}", A_Tab)
 		; string := SpacesToTabs(string)
 	}
-	; Create a new subfolder, add file to it
+
+	; Create a new subfolder, add hightlighted file to it
 	Else If ThisMenuItem =&Add File to Subfolder...
 	{
 		SplitPath, string, , dir, , nameNoExt
@@ -452,7 +571,7 @@ Menu_Action(ThisMenuItem, string)
 	}
 
 	; Copy clipboard contents to a text file in a folder currently open in Windows Explorer
-	Else If ThisMenuItem =&Clipboard to File....
+	Else If ThisMenuItem =&Clipboard to File...
 	{
 		WinGet, WinID, ID, ahk_class CabinetWClass
 		CurrentPath := ExplorerPath(WinID)
@@ -462,17 +581,15 @@ Menu_Action(ThisMenuItem, string)
 		file.Write(string "`n")
 		file.Close()
 	}
+
 	; Convert time and paste string in different time zones
 	Else If ThisMenuItem =&Insert Specified Time
 	{
-
 		Gui, +LastFound
-		Gui, Show
+		Gui, Show, , Insert Specified Time
 		GuiHWND := WinExist() 
 		WinWaitClose, ahk_id %GuiHWND% 
-		; string := buildTimeConversionGUI()
 		string := ButtonSendAlltoClipboard()
-		; string := timeConversion(string)
 	}
 Return string
 }
@@ -484,65 +601,50 @@ ButtonSendAlltoClipboard(){
 	global dateUTC
 	global dateIST
 	string := dateEST . " [" . datePST . " | " . dateUTC . " | " . dateIST . "]"
-	; ExitApp
 return string
 }
 
-ButtonConvertTime:
+; Close GUI when pressing OK
+ButtonOK:
+	WinClose, Insert Specified Time
+return
+
+; Format date for different time zones
 formatDates:
-	; MyEdit:
-	; clearText()
-	GuiControlGet, MyEdit
-	; Msgbox,%A_GuiControl%
-	; utcTime := A_NowUTC
-	utcTime := MyEdit
+	GuiControlGet, utcTime
 	backupString := utcTime
-	; estObject := time("America/New_York")
-	; pstObject := time("PST8PDT")
-	; estOffset := estObject.utc_offset
-	estOffset := -5
-	; pstOffset := pstObject.utc_offset
-	pstOffset := -8
+	estObject := time("America/New_York")
+	pstObject := time("PST8PDT")
+	; estOffset := estObject.utc_offset || -5
+	; estOffset := -5
+	estOffset := estObject.utc_offset
+	; pstOffset := pstObject.utc_offset || -8
+	; pstOffset := -8
+	pstOffset := pstObject.utc_offset
 	istOffset := 5.5
+
+	; Format UTC
 	FormatTime, dateUTC, %utcTime%, MMM. d @ h:mmtt UTC
 	GuiControl, Text, Date1, %dateUTC%
+
+	; Format EST
 	utcTime += estOffset, hours
 	FormatTime, dateEST, %utcTime%, MMM. d @ h:mmtt EST
 	GuiControl, Text, Date2, %dateEST%
 	utcTime := backupString
 
+	; Format PST
 	utcTime += pstOffset, hours
 	FormatTime, datePST, %utcTime%, MMM. d @ h:mmtt PST
 	GuiControl, Text, Date3, %datePST%
 	utcTime := backupString
 
+	; Format IST
 	utcTime += istOffset, hours
 	FormatTime, dateIST, %utcTime%, MMM. d @ h:mmtt IST
 	GuiControl, Text, Date4, %dateIST%
 	utcTime := backupString
-
-	; clearText()
-	; string := ButtonSendAlltoClipboard(dateEST, datePST, dateUTC, dateIST)
 return
-
-; Empty text fields
-; clearText(){
-; 	GuiControl, Text, Date1, 
-; 	GuiControl, Text, Date2, 
-; 	GuiControl, Text, Date3, 
-; 	GuiControl, Text, Date4, 
-; return
-; }
-
-; Exit
-; GuiEscape:
-; GuiClose:
-; ButtonCancel:
-; ExitApp
-
-; N/A
-EMPTY:
-Return
 
 ; Close ToolTip
 TOOLTIP:
@@ -570,11 +672,6 @@ CapsLock_State_Toggle(State)
 	ToolTip, CapsLock %State%
 	SetTimer, TOOLTIP, On
 }
-
-; Display About message
-ABOUT:
-	MsgBox, 0, CAPshift, %About%
-Return
 
 ; https://gist.github.com/davebrny/8bdbef225aedf6478c2cb6414f4b9bce
 ; Type what the anchor word is and swap the text on the opposite sides
@@ -611,59 +708,15 @@ text_swap(string)
 return string
 }
 
-; Convert the time
-timeConversion(string)
-{
-
-	; 	; string := DateParse(string)
-	; 	; stringOfTime := A_NowUTC
-	; 	; MsgBox, %string%
-	; 	; stll := StrLen(string)
-	; 	; MsgBox, %stll%
-
-	; 	; timeString := DateParse(string)
-	; 	; if (string is String) {
-	; 	; 	string := A_NowUTC
-	; 	; }
-	; 	; else if (timeString is time){
-	; 	; 	string := timeString
-	; 	; } else {
-	; 	; 	string := A_NowUTC
-	; 	; }
-
-	; string := A_NowUTC
-
-	; backupString := string
-	; estObject := time("America/New_York")
-	; pstObject := time("PST8PDT")
-	; estOffset := estObject.utc_offset
-	; pstOffset := pstObject.utc_offset
-	; istOffset := "05:30"
-
-	; string += estOffset, hours
-	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	; stringTime := OutputVar . " EST ["
-	; string := backupString
-
-	; string += pstOffset, hours
-	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	; stringTime := stringTime . OutputVar . " PST | "
-	; string := backupString
-
-	; string += istOffset, hours
-	; FormatTime, OutputVar, %string%, MMM. d @ h:mmtt
-	; stringTime := stringTime . OutputVar . " IST | "
-	; string := backupString
-
-	; FormatTime, OutputVar, %string%, MMM. d @ HH:mm
-	; stringTime := stringTime . OutputVar . " UTC]"
-
-	; stringTime := string
-	; stringTime += "`n"
-	; stringTime += estOffset, hours
-	; stringTime += "`n"
-
-return stringTime
+; Logic to swap text in string using the anchor string at_this
+swap(string, at_this) {
+	stringGetPos, pos, string, % at_this
+	stringMid, left, string, pos, , L
+	stringGetPos, pos, string, % at_this
+	stringMid, right, string, pos + strLen(at_this) + 1
+	stringRight, left_space, left, % strLen(left) - strLen(rTrim(left))
+	stringLeft, right_space, right, % strLen(right) - strLen(lTrim(right))
+return lTrim(right) . left_space . at_this . right_space . rTrim(left)
 }
 
 ; https://www.autohotkey.com/board/topic/73844-tabs-to-spaces-which-preserves-alignment/
@@ -713,17 +766,6 @@ SpacesToTabs(string, outEOL="`r`n", EOL="`n", Omit="`r"){
 return r
 }
 
-; Logic to swap text in string using the anchor string at_this
-swap(string, at_this) {
-	stringGetPos, pos, string, % at_this
-	stringMid, left, string, pos, , L
-	stringGetPos, pos, string, % at_this
-	stringMid, right, string, pos + strLen(at_this) + 1
-	stringRight, left_space, left, % strLen(left) - strLen(rTrim(left))
-	stringLeft, right_space, right, % strLen(right) - strLen(lTrim(right))
-return lTrim(right) . left_space . at_this . right_space . rTrim(left)
-}
-
 ; https://www.autohotkey.com/boards/viewtopic.php?t=71645
 ; Return location of active File Explorer directory
 ExplorerPath(_hwnd)
@@ -742,11 +784,11 @@ ExplorerPath(_hwnd)
 ; Creates string of formatted dates
 DateFormats(Date)
 {
-	FormatTime, OutputVar , %Date%, h:mm tt ;12 hour clock
+	FormatTime, OutputVar , %Date%, h:mm tt EST
 	List := OutputVar
-	FormatTime, OutputVar , %Date%, HH:mm ;24 hour clock
+	FormatTime, OutputVar , %Date%, HH:mm EST
 	List := List . "~" . OutputVar
-	FormatTime, OutputVar , %Date%, ShortDate ; 11/5/2015
+	FormatTime, OutputVar , %Date%, ShortDate
 	List := List . "~" . OutputVar
 	FormatTime, OutputVar , %Date%, MMM. d, yyyy
 	List := List . "~" . OutputVar
@@ -754,9 +796,9 @@ DateFormats(Date)
 	List := List . "~" . OutputVar
 	FormatTime, OutputVar , %Date%, LongDate
 	List := List . "~" . OutputVar
-	FormatTime, OutputVar, %Date%, h:mm tt, dddd, MMMM d, yyyy
+	FormatTime, OutputVar, %Date%, h:mm tt EST, dddd, MMMM d, yyyy
 	List := List . "~" . OutputVar
-	FormatTime, OutputVar, %Date%, dddd, MMMM d, yyyy @ hh:mm:ss tt
+	FormatTime, OutputVar, %Date%, dddd, MMMM d, yyyy @ hh:mm:ss tt EST
 	List := List . "~" . OutputVar
 	FormatTime, OutputVar, %Date%, ddd_MM-dd-yyyy_hh-mmtt_EST
 	List := List . "~" . OutputVar
