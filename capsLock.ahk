@@ -154,7 +154,7 @@ MENU:
 	Menu, convert, Add, &Explorer..., :Explorer...
 	Menu, convert, Add, 
 	; Run scripts
-	Menu, Scripts..., Add, &Alex, MENU_ACTION
+	Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
 	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
 	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION	
 	Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
@@ -477,7 +477,7 @@ Menu_Action(ThisMenuItem, string)
 
 		WinGet, WinID, ID, ahk_class CabinetWClass
 		CurrentPath := ExplorerPath(WinID)
-		Run, powershell -NoExit -Command "'D:\Dropbox\code\grep.ps1' -path %CurrentPath%"
+		Run, powershell -NoExit -Command "D:\Dropbox\code\grep.ps1 -path '%CurrentPath%'"
 		stringGlobal := string
 	}
 
@@ -530,7 +530,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; Run Alex to check string for insensitivity (requires Node support)
 	; https://github.com/get-alex/alex
-	Else If ThisMenuItem =&Alex
+	Else If ThisMenuItem =Check Sensitivity with &Alex.ps1 (npm)
 	{
 		Run, powershell -NoExit -Command """%string%""" | npx alex --stdin"
 		stringGlobal := string
