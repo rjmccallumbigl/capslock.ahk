@@ -22,6 +22,9 @@ Replace the caps lock key with a new custom menu for modifying text, launching s
 ### Run Scripts
 ![Run scripts](media/runScripts.gif)
 
+### Time Strings
+![Time strings](media/time.gif)
+
 ## spotifyHotkeys.ahk 
 Shortcuts to add currently playing songs to particular playlists or seek forward/backwards using media button keys on my keyboard
 
