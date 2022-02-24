@@ -1,5 +1,5 @@
 # capslock.ahk
-Replace the caps lock key with a new custom menu for modifying text, launching scripts, or launching files/pages.
+My take on the CAPSHIFT AHK script from https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/. Replace the caps lock key with a new custom menu for modifying text, launching scripts, or launching files/pages.
 
 ## String Manipulation
 ![String manipulation](media/stringManipulation.gif)
