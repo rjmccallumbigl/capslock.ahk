@@ -1,9 +1,10 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
+#Include, *i .\ImagePut\ImagePut.ahk
 
 /*
-***************************************** 
+**********************************************************************************
  *
  * DESCRIPTION
  * Slows down and extends the CAPSLOCK key. Based on CAPSHIFT.
@@ -11,11 +12,16 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * SOURCE
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
+ * VERSION
+ * 0.5.1
+ *
  * TODO
+ *  Add PaddleOCR.ahk for OCR capabilities on images: https://github.com/telppa/PaddleOCR-AutoHotkey
+ *  Add Vis2.ahk for OCR capabilities on images: https://github.com/iseahound/Vis2
  *	Storage Usage
  *	Indicate what processes/programs are using this file (handles)
-
-*******************************************
+ *
+**********************************************************************************
 */
 
 ; Declare variables
@@ -163,12 +169,16 @@ MENU:
 	Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION			
 	Menu, convert, Add, &Scripts..., :Scripts...
 	Menu, convert, Add, 
+	; Image manipulation
+	Menu, Images..., Add, &Save image from clipboard to folder, MENU_ACTION
+	Menu, convert, Add, &Images..., :Images...
+	Menu, convert, Add, 
 	; Insert/modify datetime strings
 	Menu, TimeDate, Add, Time/Date, MENU_ACTION
 	Menu, TimeDate, DeleteAll 
 	List := DateFormats(A_Now)
 	TextMenuDate(List,"TimeDate","DateAction")
-	Menu, convert, Add, &Insert Time/Date, :TimeDate
+	Menu, convert, Add, &Insert Time/Date..., :TimeDate
 	Menu, convert, Add, &Insert Specified Time, MENU_ACTION
 	Menu,convert, Default, &CapsLock Toggle	
 	Menu, convert, Show
@@ -575,7 +585,7 @@ Menu_Action(ThisMenuItem, string)
 	{
 		WinGet, WinID, ID, ahk_class CabinetWClass
 		CurrentPath := ExplorerPath(WinID)
-		newPath := CurrentPath "\clipboardToFile.txt"
+		newPath := CurrentPath . "\clipboardToFile.txt"
 		; FileAppend, string`n, %CurrentPath%%newPath%
 		file := FileOpen(newPath, "rw")
 		file.Write(string "`n")
@@ -590,6 +600,21 @@ Menu_Action(ThisMenuItem, string)
 		GuiHWND := WinExist() 
 		WinWaitClose, ahk_id %GuiHWND% 
 		string := ButtonSendAlltoClipboard()
+	}
+
+	; Save image from clipboard to folder
+	Else If ThisMenuItem =&Save image from clipboard to folder
+	{
+		WinGet, WinID, ID, ahk_class CabinetWClass
+		CurrentPath := ExplorerPath(WinID)
+		FormatTime, timeOutputVar, %Date%, ddd_MM-dd-yyyy_hh-mm-sstt_EST
+		If (!OldClipboard)
+		{
+			target := string
+		} else {
+			target := OldClipboard
+		}
+		stringGlobal := ImagePutFile(target, CurrentPath . "\" . timeOutputVar . ".png")
 	}
 Return string
 }
