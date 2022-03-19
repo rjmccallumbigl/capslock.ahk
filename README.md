@@ -21,3 +21,6 @@ My take on the CAPSHIFT AHK script from https://www.autohotkey.com/board/topic/4
 
 ## Time Strings
 ![Time strings](media/time.gif)
+
+## Image Manipulation
+![Image Manipulation](media/imageManipulation.gif)

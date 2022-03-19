@@ -1,7 +1,7 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
-#Include, *i .\ImagePut\ImagePut.ahk
+#include <Vis2>
 
 /*
 **********************************************************************************
@@ -13,11 +13,9 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.5.1
+ * 0.5.2
  *
  * TODO
- *  Add PaddleOCR.ahk for OCR capabilities on images: https://github.com/telppa/PaddleOCR-AutoHotkey
- *  Add Vis2.ahk for OCR capabilities on images: https://github.com/iseahound/Vis2
  *	Storage Usage
  *	Indicate what processes/programs are using this file (handles)
  *
@@ -170,7 +168,8 @@ MENU:
 	Menu, convert, Add, &Scripts..., :Scripts...
 	Menu, convert, Add, 
 	; Image manipulation
-	Menu, Images..., Add, &Save image from clipboard to folder, MENU_ACTION
+	Menu, Images..., Add, Save image from clipboard to &folder, MENU_ACTION	
+	Menu, Images..., Add, OCR with &Vis2.ahk, MENU_ACTION
 	Menu, convert, Add, &Images..., :Images...
 	Menu, convert, Add, 
 	; Insert/modify datetime strings
@@ -603,7 +602,7 @@ Menu_Action(ThisMenuItem, string)
 	}
 
 	; Save image from clipboard to folder
-	Else If ThisMenuItem =&Save image from clipboard to folder
+	Else If ThisMenuItem =Save image from clipboard to &folder
 	{
 		WinGet, WinID, ID, ahk_class CabinetWClass
 		CurrentPath := ExplorerPath(WinID)
@@ -615,6 +614,12 @@ Menu_Action(ThisMenuItem, string)
 			target := OldClipboard
 		}
 		stringGlobal := ImagePutFile(target, CurrentPath . "\" . timeOutputVar . ".png")
+	}
+
+	; Use OCR with Vis2 https://github.com/iseahound/Vis2
+	Else If ThisMenuItem =OCR with &Vis2.ahk
+	{
+		stringGlobal := OCR()
 	}
 Return string
 }
@@ -894,7 +899,7 @@ Return obj
 return
 
 ; https://www.autohotkey.com/board/topic/18760-date-parser-convert-any-date-format-to-yyyymmddhh24miss
-; Convert date string to date object
+; Convert date string to date object, not integrated yet due to several failed tests
 DateParse(str, americanOrder=0) {
 	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-zA-Z]*"
 	, dayAndMonth := "(\d{1,2})[^a-zA-Z0-9:.]+(\d{1,2})"
