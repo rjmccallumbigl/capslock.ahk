@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.5.2
+ * 0.5.3
  *
  * TODO
  *	Storage Usage
@@ -395,11 +395,11 @@ Menu_Action(ThisMenuItem, string)
 
 	; Google the highlighted word
 	Else If ThisMenuItem =&Google
-		Run, http://www.google.com/search?q=%string%
+		Run, https://www.google.com/search?q=%string%
 
 	; Looks the highlighted word up in a thesaurus
 	Else If ThisMenuItem =&Thesaurus
-		Run, http://www.thesaurus.com/browse/%string%
+		Run, https://www.thesaurus.com/browse/%string%
 
 	; Looks the highlighted word up in Wiki
 	Else If ThisMenuItem =&Wikipedia
@@ -407,7 +407,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; Defines the highlighted word
 	Else If ThisMenuItem =&Define
-		Run, http://www.google.com/search?q=define+%string%
+		Run, https://www.google.com/search?q=define+%string%
 
 	; If the copied text is a valid folder, open it in Windows Explorer
 	Else If ThisMenuItem =&Open Folder...
@@ -866,7 +866,7 @@ Return
 ; Return time object from API
 time(area) {
 	WinHttp := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	WinHttp.Open("GET", "http://worldtimeapi.org/api/timezone/" area, false), WinHttp.Send()
+	WinHttp.Open("GET", "https://worldtimeapi.org/api/timezone/" area, false), WinHttp.Send()
 	timeObject := JsonToAHK(WinHttp.ResponseText) 
 Return timeObject
 }
