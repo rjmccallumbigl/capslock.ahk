@@ -37,6 +37,7 @@ Gui, Add, Edit, w200 vDate1
 Gui, Add, Edit, w200 vDate2
 Gui, Add, Edit, w200 vDate3
 Gui, Add, Edit, w200 vDate4
+Gui, Add, Edit, w200 vDate5
 Gui, Add, Button, Default, &OK
 Gui +MinimizeBox
 
@@ -641,9 +642,10 @@ Return string
 ButtonSendAlltoClipboard(){
 	global dateEST
 	global datePST
+	global dateCST
 	global dateUTC
 	global dateIST
-	string := dateEST . " [" . datePST . " | " . dateUTC . " | " . dateIST . "]"
+	string := dateEST . " [" . datePST . " | " . dateCST . " | " . dateUTC . " | " . dateIST . "]"
 return string
 }
 
@@ -658,12 +660,10 @@ formatDates:
 	backupString := utcTime
 	estObject := time("America/New_York")
 	pstObject := time("PST8PDT")
-	; estOffset := estObject.utc_offset || -5
-	; estOffset := -5
+	cstObject := time("CST6CDT")
 	estOffset := estObject.utc_offset
-	; pstOffset := pstObject.utc_offset || -8
-	; pstOffset := -8
 	pstOffset := pstObject.utc_offset
+	cstOffset := cstObject.utc_offset
 	istOffset := 5.5
 
 	; Format UTC
@@ -682,10 +682,16 @@ formatDates:
 	GuiControl, Text, Date3, %datePST%
 	utcTime := backupString
 
+	; Format CST
+	utcTime += cstOffset, hours
+	FormatTime, dateCST, %utcTime%, MMM. d @ h:mmtt CST
+	GuiControl, Text, Date4, %dateCST%
+	utcTime := backupString
+
 	; Format IST
 	utcTime += istOffset, hours
 	FormatTime, dateIST, %utcTime%, MMM. d @ h:mmtt IST
-	GuiControl, Text, Date4, %dateIST%
+	GuiControl, Text, Date5, %dateIST%
 	utcTime := backupString
 return
 
@@ -879,7 +885,7 @@ Return
 ; Return time object from API
 time(area) {
 	WinHttp := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	WinHttp.Open("GET", "https://worldtimeapi.org/api/timezone/" area, false), WinHttp.Send()
+	WinHttp.Open("GET", "https://worldtimeapi.org/api/timezone/" . area, false), WinHttp.Send()
 	timeObject := JsonToAHK(WinHttp.ResponseText)
 Return timeObject
 }
@@ -908,51 +914,6 @@ JsonToAHK(json, rec := false) {
 		}
 	}
 Return obj
-}
-return
-
-; https://www.autohotkey.com/board/topic/18760-date-parser-convert-any-date-format-to-yyyymmddhh24miss
-; Convert date string to date object, not integrated yet due to several failed tests
-DateParse(str, americanOrder=0) {
-	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-zA-Z]*"
-	, dayAndMonth := "(\d{1,2})[^a-zA-Z0-9:.]+(\d{1,2})"
-	, dayAndMonthName := "(?:(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Day>\d{1,2})[^a-zA-Z0-9]+|(?<Day>\d{1,2})[^a-zA-Z0-9:.]*(?<Month>" . monthNames . "))"
-	, monthNameAndYear := "(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Year>(?:\d{4}|\d{2}))"
-	If RegExMatch(str, "i)^\s*(?:(\d{4})([\s\-:\/])(\d{1,2})\2(\d{1,2}))?(?:\s*[T\s](\d{1,2})([\s\-:\/])(\d{1,2})(?:\6(\d{1,2})\s*(?:(Z)|(\+|\-)?(\d{1,2})\6(\d{1,2})(?:\6(\d{1,2}))?)?)?)?\s*$", i) ;ISO 8601 timestamps
-		year := i1, month := i3, day := i4, t1 := i5, t2 := i7, t3 := i8
-	Else If !RegExMatch(str, "^\W*(\d{1,2}+)(\d{2})\W*$", t){
-		RegExMatch(str, "i)(\d{1,2})"					;hours
-			. "\s*:\s*(\d{1,2})"				;minutes
-			. "(?:\s*:\s*(\d{1,2}))?"			;seconds
-		. "(?:\s*([ap]m))?", t)				;am/pm
-		StringReplace, str, str, %t%
-		if RegExMatch(str, "Ji)" . dayAndMonthName . "[^a-zA-Z0-9]*(?<Year>(?:\d{4}|\d{2}))?", d) ; named month eg 22May14; May 14, 2014; 22May, 2014
-			year := dYear, month := dMonth, day := dDay
-		else if Regexmatch(str, "i)" . monthNameAndYear, d) ; named month and year without day eg May14; May 2014
-			year := dYear, month := dMonth
-		else {
-			If Regexmatch(str, "i)(\d{4})[^a-zA-Z0-9:.]+" . dayAndMonth, d) ;2004/22/03
-				year := d1, month := d3, day := d2
-			Else If Regexmatch(str, "i)" . dayAndMonth . "(?:[^a-zA-Z0-9:.]+((?:\d{4}|\d{2})))?", d) ;22/03/2004 or 22/03/04
-				year := d3, month := d2, day := d1
-			If (RegExMatch(day, monthNames) or americanOrder and !RegExMatch(month, monthNames) or (month > 12 and day <= 12)) ;try to infer day/month order
-				tmp := month, month := day, day := tmp
-		}
-	}
-	f = %A_FormatFloat%
-	SetFormat, Float, 02.0
-	if (day or month or year) and not (day and month and year) ; partial date
-		if not month or not (day or month) or (t1 and not day) ; partial date must have month and day with time or day or year without time
-		return
-	else if not day ; without time use 1st for day if not present
-		day := 1
-	d := (StrLen(year) == 2 ? "20" . year : (year ? year : A_YYYY))
-	. ((month := month + 0 ? month : InStr(monthNames, SubStr(month, 1, 3)) // 4 ) > 0 ? month + 0.0 : A_MM)
-	. ((day += 0.0) ? day : A_DD)
-	. t1 + (t1 == 12 ? t4 = "am" ? -12.0 : 0.0 : t4 = "pm" ? 12.0 : 0.0)
-	. t2 + 0.0 . t3 + 0.0
-	SetFormat, Float, %f%
-return, d
 }
 
 ; Exit app
