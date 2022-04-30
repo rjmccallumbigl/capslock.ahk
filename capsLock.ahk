@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.5.3
+ * 0.6.1
  *
  * TODO
  *	Storage Usage
@@ -28,6 +28,8 @@ SetTimer,TOOLTIP,Off
 TimeCapsToggle = 5
 TimeOut = 30
 global stringGlobal := ""
+global MouseX
+global MouseY
 
 ; Build GUI in case we use the Insert Specified Time function
 Gui, Add, DateTime, vutcTime gformatDates choose%A_NowUTC%, MMM. d @ h:mmtt 'UTC'
@@ -35,6 +37,7 @@ Gui, Add, Edit, w200 vDate1
 Gui, Add, Edit, w200 vDate2
 Gui, Add, Edit, w200 vDate3
 Gui, Add, Edit, w200 vDate4
+Gui, Add, Edit, w200 vDate5
 Gui, Add, Button, Default, &OK
 Gui +MinimizeBox
 
@@ -53,6 +56,7 @@ CapsLock::
 ~RButton & MButton::
 	OldClipboard:= ClipboardAll ;Save existing clipboard.
 	counter = 0
+	MouseGetPos, MouseX, MouseY
 	Progress, ZH16 ZX0 ZY0 B R0-%TimeOut%
 	Loop, %TimeOut%
 	{
@@ -79,7 +83,7 @@ CapsLock::
 	If counter = %TimeOut%
 		Gosub, MENU
 	Else If (counter > TimeCapsToggle)
-	{		
+	{
 		Gosub, CapsLock_State_Toggle
 	}
 
@@ -102,17 +106,17 @@ MENU:
 	If (GetKeyState("CapsLock", "T") = True)
 		Menu,Convert,Check, &CapsLock Toggle
 	Else
-		Menu,Convert,uncheck, &CapsLock Toggle	
-	Menu, convert, Add, 
+		Menu,Convert,uncheck, &CapsLock Toggle
+	Menu, convert, Add,
 	Menu, convert, Add, &UPPER CASE, MENU_ACTION
 	Menu, convert, Add, &lower case, MENU_ACTION
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	Menu, convert, Add, &Title Case, MENU_ACTION
 	Menu, convert, Add, &Sentence case, MENU_ACTION
 	Menu, convert, Add, &iNVERT cASE, MENU_ACTION
 	Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
-	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION	
-	Menu, convert, Add, 
+	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION
+	Menu, convert, Add,
 	; Advanced string manipulation
 	Menu, Modify Text..., Add, Remove_&under_scores, MENU_ACTION
 	Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
@@ -138,7 +142,7 @@ MENU:
 	Menu, Wrap Text..., Add, &`'...', MENU_ACTION
 	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
 	Menu, convert, Add, &Wrap Text..., :Wrap Text...
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	; Utilize internet browser
 	Menu, Browser Search..., Add, &Google, MENU_ACTION
 	Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
@@ -146,40 +150,41 @@ MENU:
 	Menu, Browser Search..., Add, &Define, MENU_ACTION
 	Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
 	Menu, convert, Add, &Browser Search..., :Browser Search...
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	; Utilize Windows Explorer
-	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION	
-	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION	
-	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION	
+	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION
+	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION
+	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION
 	Menu, Explorer..., Add, &Add File to Subfolder..., MENU_ACTION
 	Menu, Explorer..., Add, &Pull File Out to Parent Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Clipboard to File..., MENU_ACTION	
+	Menu, Explorer..., Add, &Clipboard to File..., MENU_ACTION
 	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION
 	Menu, convert, Add, &Explorer..., :Explorer...
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	; Run scripts
 	Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
 	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
-	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION	
+	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
 	Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
-	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION		
-	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION		
-	Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION			
+	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION
+	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION
+	Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION
 	Menu, convert, Add, &Scripts..., :Scripts...
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	; Image manipulation
-	Menu, Images..., Add, Save image from clipboard to &folder, MENU_ACTION	
+	Menu, Images..., Add, Save image from clipboard to &folder, MENU_ACTION
 	Menu, Images..., Add, OCR with &Vis2.ahk, MENU_ACTION
+	Menu, Images..., Add, Get &HEX value from cursor, MENU_ACTION
 	Menu, convert, Add, &Images..., :Images...
-	Menu, convert, Add, 
+	Menu, convert, Add,
 	; Insert/modify datetime strings
 	Menu, TimeDate, Add, Time/Date, MENU_ACTION
-	Menu, TimeDate, DeleteAll 
+	Menu, TimeDate, DeleteAll
 	List := DateFormats(A_Now)
 	TextMenuDate(List,"TimeDate","DateAction")
 	Menu, convert, Add, &Insert Time/Date..., :TimeDate
 	Menu, convert, Add, &Insert Specified Time, MENU_ACTION
-	Menu,convert, Default, &CapsLock Toggle	
+	Menu,convert, Default, &CapsLock Toggle
 	Menu, convert, Show
 Return
 
@@ -238,16 +243,16 @@ Menu_Action(ThisMenuItem, string)
 		newString := ""
 		splitString:= StrSplit(string)
 		for index, element in splitString
-		{					
+		{
 			If (element != " "){
-				newString .= element				
-			} 
+				newString .= element
+			}
 			; Do not space out punctuation. Loooks better to me.
 			If !RegExMatch(splitString[index + 1], "[[:punct:]]")
 				newString .= " "
 		}
 		string := newString
-	}	
+	}
 
 	; Convert to iNVERT cASE
 	Else If ThisMenuItem =&iNVERT cASE
@@ -351,7 +356,7 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =Remove &Lowercase
 		string := RegExReplace(string, "[a-z]","")
 
-	; Sort the string 
+	; Sort the string
 	Else If ThisMenuItem =&`Sort
 		Sort, string
 
@@ -359,10 +364,10 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&snake_Case to CamelCase
 	{
 		string := RegExReplace(string, "(([A-Z]+)|(?i)((?<=[a-z])|[a-z])([a-z]*))[ _-]([a-z]|[A-Z]+)", "$L2$L3$4$T5")
-	}	
+	}
 
 	; Wrap text with parentheses
-	Else If ThisMenuItem =&`(...)	
+	Else If ThisMenuItem =&`(...)
 		string = (%string%)
 
 	; Wrap text with curly braces
@@ -390,7 +395,7 @@ Menu_Action(ThisMenuItem, string)
 		string = '%string%'
 
 	; Wrap text with double quotes
-	Else If ThisMenuItem =&`"..."	
+	Else If ThisMenuItem =&`"..."
 		string = `"%string%`"
 
 	; Google the highlighted word
@@ -403,7 +408,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; Looks the highlighted word up in Wiki
 	Else If ThisMenuItem =&Wikipedia
-		Run, https://en.wikipedia.org/wiki/%string% 
+		Run, https://en.wikipedia.org/wiki/%string%
 
 	; Defines the highlighted word
 	Else If ThisMenuItem =&Define
@@ -433,7 +438,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
-		Run, %string% 
+		Run, %string%
 
 	; Run old portable CCleaner 5.87 in auto mode
 	Else If ThisMenuItem =&CCleaner
@@ -453,7 +458,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; Save file contents to clipboard
 	Else If (ThisMenuItem ="&File to Clipboard..."){
-		file := FileOpen(string, "r")	
+		file := FileOpen(string, "r")
 		stringGlobal := File.Read()
 		file.Close()
 	}
@@ -466,8 +471,8 @@ Menu_Action(ThisMenuItem, string)
 		;###########################
 		; 		# Greps a string after specifying a path to one or more locations. Wildcards are permitted.
 
-		; param (	
-		; 	[Parameter(Mandatory = $true,		
+		; param (
+		; 	[Parameter(Mandatory = $true,
 		; 		ValueFromPipeline = $true,
 		; 		ValueFromPipelineByPropertyName = $true,
 		; 		HelpMessage = "Path to one or more locations.")]
@@ -513,7 +518,7 @@ Menu_Action(ThisMenuItem, string)
 		;###########################
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\byronbayer\Powershell\Remove-ResourceGroupsAsyncWithPattern.ps1"
 		stringGlobal := string
-	}		
+	}
 
 	; Run createNewVM.ps1 script
 	Else If ThisMenuItem =&createNewVM.ps1
@@ -524,7 +529,7 @@ Menu_Action(ThisMenuItem, string)
 		;###########################
 		Run, C:\Users\rymccall\GitHub\Azure-PowerShell---Create-New-VM\createNewVM.ps1
 		stringGlobal := string
-	}		
+	}
 
 	; Run {Update NSGS}.ps1 script
 	Else If ThisMenuItem =&{Update NSGS}.ps1
@@ -558,7 +563,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; Convert Spaces to Tabs
 	Else If ThisMenuItem =&Spaces to Tabs
-	{		
+	{
 		string := RegExReplace(string, "[\s]{4}", A_Tab)
 		; string := SpacesToTabs(string)
 	}
@@ -596,8 +601,8 @@ Menu_Action(ThisMenuItem, string)
 	{
 		Gui, +LastFound
 		Gui, Show, , Insert Specified Time
-		GuiHWND := WinExist() 
-		WinWaitClose, ahk_id %GuiHWND% 
+		GuiHWND := WinExist()
+		WinWaitClose, ahk_id %GuiHWND%
 		string := ButtonSendAlltoClipboard()
 	}
 
@@ -621,6 +626,15 @@ Menu_Action(ThisMenuItem, string)
 	{
 		stringGlobal := OCR()
 	}
+
+	; https://dev.to/radualexandrub/top-8-macros-for-developers-to-maximize-their-productivity-with-ahk-5bfj
+	Else If ThisMenuItem =Get &HEX value from cursor
+	{
+		PixelGetColor, color, %MouseX%, %MouseY%, RGB
+		StringLower, color, color
+		stringGlobal := "#" . SubStr(color, 3)
+	}
+
 Return string
 }
 
@@ -628,9 +642,10 @@ Return string
 ButtonSendAlltoClipboard(){
 	global dateEST
 	global datePST
+	global dateCST
 	global dateUTC
 	global dateIST
-	string := dateEST . " [" . datePST . " | " . dateUTC . " | " . dateIST . "]"
+	string := dateEST . " [" . datePST . " | " . dateCST . " | " . dateUTC . " | " . dateIST . "]"
 return string
 }
 
@@ -645,12 +660,10 @@ formatDates:
 	backupString := utcTime
 	estObject := time("America/New_York")
 	pstObject := time("PST8PDT")
-	; estOffset := estObject.utc_offset || -5
-	; estOffset := -5
+	cstObject := time("CST6CDT")
 	estOffset := estObject.utc_offset
-	; pstOffset := pstObject.utc_offset || -8
-	; pstOffset := -8
 	pstOffset := pstObject.utc_offset
+	cstOffset := cstObject.utc_offset
 	istOffset := 5.5
 
 	; Format UTC
@@ -669,10 +682,16 @@ formatDates:
 	GuiControl, Text, Date3, %datePST%
 	utcTime := backupString
 
+	; Format CST
+	utcTime += cstOffset, hours
+	FormatTime, dateCST, %utcTime%, MMM. d @ h:mmtt CST
+	GuiControl, Text, Date4, %dateCST%
+	utcTime := backupString
+
 	; Format IST
 	utcTime += istOffset, hours
 	FormatTime, dateIST, %utcTime%, MMM. d @ h:mmtt IST
-	GuiControl, Text, Date4, %dateIST%
+	GuiControl, Text, Date5, %dateIST%
 	utcTime := backupString
 return
 
@@ -687,7 +706,7 @@ CapsLock_State_Toggle:
 	If GetKeyState("CapsLock", "T")
 	{
 		state = Off
-	}		
+	}
 	Else
 	{
 		state = On
@@ -698,7 +717,7 @@ Return
 ; Set the state of CapsLock
 CapsLock_State_Toggle(State)
 {
-	SetCapsLockState, %State%	
+	SetCapsLockState, %State%
 	ToolTip, CapsLock %State%
 	SetTimer, TOOLTIP, On
 }
@@ -780,7 +799,7 @@ SpacesToTabs(string, outEOL="`r`n", EOL="`n", Omit="`r"){
 		Loop Parse, A_LoopField
 		{
 			index++
-			If (A_LoopField = A_Space){				
+			If (A_LoopField = A_Space){
 				spaceCount++
 				If (spaceCount == 4){
 					r .= "	"
@@ -844,7 +863,7 @@ TextMenuDate(TextOptions,Menu,Action)
 	{
 		Item := MenuItems%A_Index%
 		Menu, %Menu%, add, %Item%, %Action%
-		Switch 
+		Switch
 		{
 		Case (InStr(Item,":") and InStr(Item,"`,")):
 			Menu, TimeDate, Icon, %Item%, %A_Windir%\System32\timedate.cpl
@@ -866,80 +885,35 @@ Return
 ; Return time object from API
 time(area) {
 	WinHttp := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	WinHttp.Open("GET", "https://worldtimeapi.org/api/timezone/" area, false), WinHttp.Send()
-	timeObject := JsonToAHK(WinHttp.ResponseText) 
+	WinHttp.Open("GET", "https://worldtimeapi.org/api/timezone/" . area, false), WinHttp.Send()
+	timeObject := JsonToAHK(WinHttp.ResponseText)
 Return timeObject
 }
 
 ; https://www.autohotkey.com/boards/viewtopic.php?t=67583
 ; Convert JSON to AHK object
-JsonToAHK(json, rec := false) { 
-	static doc := ComObjCreate("htmlfile") 
-	, __ := doc.write("<meta http-equiv=""X-UA-Compatible"" content=""IE=9"">") 
-	, JS := doc.parentWindow 
-	if !rec 
-		obj := %A_ThisFunc%(JS.eval("(" . json . ")"), true) 
-	else if !IsObject(json) 
-		obj := json 
-	else if JS.Object.prototype.toString.call(json) == "[object Array]" { 
-		obj := [] 
-		Loop % json.length 
-			obj.Push( %A_ThisFunc%(json[A_Index - 1], true) ) 
-	} 
-	else { 
-		obj := {} 
-		keys := JS.Object.keys(json) 
-		Loop % keys.length { 
-			k := keys[A_Index - 1] 
-			obj[k] := %A_ThisFunc%(json[k], true) 
-		} 
-	} 
-Return obj 
-} 
-return
-
-; https://www.autohotkey.com/board/topic/18760-date-parser-convert-any-date-format-to-yyyymmddhh24miss
-; Convert date string to date object, not integrated yet due to several failed tests
-DateParse(str, americanOrder=0) {
-	static monthNames := "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-zA-Z]*"
-	, dayAndMonth := "(\d{1,2})[^a-zA-Z0-9:.]+(\d{1,2})"
-	, dayAndMonthName := "(?:(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Day>\d{1,2})[^a-zA-Z0-9]+|(?<Day>\d{1,2})[^a-zA-Z0-9:.]*(?<Month>" . monthNames . "))"
-	, monthNameAndYear := "(?<Month>" . monthNames . ")[^a-zA-Z0-9:.]*(?<Year>(?:\d{4}|\d{2}))"
-	If RegExMatch(str, "i)^\s*(?:(\d{4})([\s\-:\/])(\d{1,2})\2(\d{1,2}))?(?:\s*[T\s](\d{1,2})([\s\-:\/])(\d{1,2})(?:\6(\d{1,2})\s*(?:(Z)|(\+|\-)?(\d{1,2})\6(\d{1,2})(?:\6(\d{1,2}))?)?)?)?\s*$", i) ;ISO 8601 timestamps
-		year := i1, month := i3, day := i4, t1 := i5, t2 := i7, t3 := i8
-	Else If !RegExMatch(str, "^\W*(\d{1,2}+)(\d{2})\W*$", t){
-		RegExMatch(str, "i)(\d{1,2})"					;hours
-			. "\s*:\s*(\d{1,2})"				;minutes
-			. "(?:\s*:\s*(\d{1,2}))?"			;seconds
-		. "(?:\s*([ap]m))?", t)				;am/pm
-		StringReplace, str, str, %t%
-		if RegExMatch(str, "Ji)" . dayAndMonthName . "[^a-zA-Z0-9]*(?<Year>(?:\d{4}|\d{2}))?", d) ; named month eg 22May14; May 14, 2014; 22May, 2014
-			year := dYear, month := dMonth, day := dDay
-		else if Regexmatch(str, "i)" . monthNameAndYear, d) ; named month and year without day eg May14; May 2014
-			year := dYear, month := dMonth
-		else {
-			If Regexmatch(str, "i)(\d{4})[^a-zA-Z0-9:.]+" . dayAndMonth, d) ;2004/22/03
-				year := d1, month := d3, day := d2
-			Else If Regexmatch(str, "i)" . dayAndMonth . "(?:[^a-zA-Z0-9:.]+((?:\d{4}|\d{2})))?", d) ;22/03/2004 or 22/03/04
-				year := d3, month := d2, day := d1
-			If (RegExMatch(day, monthNames) or americanOrder and !RegExMatch(month, monthNames) or (month > 12 and day <= 12)) ;try to infer day/month order
-				tmp := month, month := day, day := tmp
+JsonToAHK(json, rec := false) {
+	static doc := ComObjCreate("htmlfile")
+	, __ := doc.write("<meta http-equiv=""X-UA-Compatible"" content=""IE=9"">")
+	, JS := doc.parentWindow
+	if !rec
+		obj := %A_ThisFunc%(JS.eval("(" . json . ")"), true)
+	else if !IsObject(json)
+		obj := json
+	else if JS.Object.prototype.toString.call(json) == "[object Array]" {
+		obj := []
+		Loop % json.length
+			obj.Push( %A_ThisFunc%(json[A_Index - 1], true) )
+	}
+	else {
+		obj := {}
+		keys := JS.Object.keys(json)
+		Loop % keys.length {
+			k := keys[A_Index - 1]
+			obj[k] := %A_ThisFunc%(json[k], true)
 		}
 	}
-	f = %A_FormatFloat%
-	SetFormat, Float, 02.0
-	if (day or month or year) and not (day and month and year) ; partial date
-		if not month or not (day or month) or (t1 and not day) ; partial date must have month and day with time or day or year without time
-		return
-	else if not day ; without time use 1st for day if not present
-		day := 1
-	d := (StrLen(year) == 2 ? "20" . year : (year ? year : A_YYYY))
-	. ((month := month + 0 ? month : InStr(monthNames, SubStr(month, 1, 3)) // 4 ) > 0 ? month + 0.0 : A_MM)
-	. ((day += 0.0) ? day : A_DD) 
-	. t1 + (t1 == 12 ? t4 = "am" ? -12.0 : 0.0 : t4 = "pm" ? 12.0 : 0.0)
-	. t2 + 0.0 . t3 + 0.0
-	SetFormat, Float, %f%
-return, d
+Return obj
 }
 
 ; Exit app
