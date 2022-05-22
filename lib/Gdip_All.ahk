@@ -1301,9 +1301,9 @@ Gdip_DrawImage(pGraphics, pBitmap, dx="", dy="", dw="", dh="", sx="", sy="", sw=
 ; Description			This function creates an image matrix ready for drawing
 ;
 ; Matrix				a matrix used to alter image attributes when drawing
-;						passed with any delimeter
+;						passed with any delimiter
 ;
-; return				returns an image matrix on sucess or 0 if it fails
+; return				returns an image matrix on success or 0 if it fails
 ;
 ; notes					MatrixBright = 1.5|0|0|0|0|0|1.5|0|0|0|0|0|1.5|0|0|0|0|0|1|0|0.05|0.05|0.05|0|1
 ;						MatrixGreyScale = 0.299|0.299|0.299|0|0|0.587|0.587|0.587|0|0|0.114|0.114|0.114|0|0|0|0|0|1|0|0|0|0|0|1
