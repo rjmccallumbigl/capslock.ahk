@@ -1,0 +1,8 @@
+on: [push, pull_request]
+name: TOC Generator
+jobs:
+  generateTOC:
+    name: TOC Generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/toc-generator@v4
