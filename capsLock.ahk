@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.6.1
+ * 0.7.0
  *
  * TODO
  *	Storage Usage
@@ -162,6 +162,9 @@ MENU:
 	Menu, convert, Add, &Explorer..., :Explorer...
 	Menu, convert, Add,
 	; Run scripts
+	Menu, Scripts..., Add, &Run in CMD, MENU_ACTION
+	Menu, Scripts..., Add, &Run in PowerShell, MENU_ACTION
+	Menu, Scripts..., Add, &Run in Ubuntu, MENU_ACTION
 	Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
 	Menu, Scripts..., Add, &CCleaner, MENU_ACTION
 	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
@@ -539,6 +542,27 @@ Menu_Action(ThisMenuItem, string)
 		; https://github.com/rjmccallumbigl/Azure-PowerShell---Add-RDP-rule-to-your-NSGs-with-a-rule-scoped-to-your-IP-address
 		;###########################
 		Run, powershell -NoExit -File "C:\Users\rymccall\OneDrive - Microsoft\PowerShell\Update your NSGs with a rule scoped to your IP address.ps1"
+		stringGlobal := string
+	}
+
+	; Run in CMD
+	Else If ThisMenuItem =&Run in CMD
+	{
+		Run, powershell -NoExit -Command "cmd /k 'echo %string% && echo ================================================ && %string%'"
+		stringGlobal := string
+	}
+
+	; Run in PowerShell
+	Else If ThisMenuItem =&Run in PowerShell
+	{
+		Run, powershell -NoExit -Command "echo '%string%'; `r`n echo ================================================; `r`n %string%"
+		stringGlobal := string
+	}
+
+	; Run in Ubuntu (WSL)
+	Else If ThisMenuItem =&Run in Ubuntu
+	{
+		Run, powershell -NoExit -Command "echo '%string%'; `r`n echo ================================================; `r`n wsl %string%"
 		stringGlobal := string
 	}
 
