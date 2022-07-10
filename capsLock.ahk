@@ -16,6 +16,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * 0.7.0
  *
  * TODO
+ *  Replace specific text with another string in highlighted text
  *	Storage Usage
  *	Indicate what processes/programs are using this file (handles)
  *
@@ -128,6 +129,7 @@ MENU:
 	Menu, Modify Text..., Add, &`Sort, MENU_ACTION
 	Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
 	Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
+	Menu, Modify Text..., Add, &Replace in Selection, MENU_ACTION
 	Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
 	Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
 	Menu, convert, Add, &Modify Text..., :Modify Text...
@@ -494,7 +496,7 @@ Menu_Action(ThisMenuItem, string)
 
 		WinGet, WinID, ID, ahk_class CabinetWClass
 		CurrentPath := ExplorerPath(WinID)
-		Run, powershell -NoExit -Command "D:\Dropbox\code\grep.ps1 -path '%CurrentPath%'"
+		Run, powershell -NoExit -Command "'C:\Users\rymccall\OneDrive - Microsoft\PowerShell\grep.ps1 -path '%CurrentPath%''"
 		stringGlobal := string
 	}
 
@@ -577,6 +579,12 @@ Menu_Action(ThisMenuItem, string)
 	Else If ThisMenuItem =&Swap at Anchor Word
 	{
 		string := text_swap(string)
+	}
+
+	; Type the replacement word to modify every occurrence of that word in a copied/highlighted string
+	Else If ThisMenuItem =&Replace in Selection
+	{
+		string := text_replace(string)
 	}
 
 	; Convert Tabs to Spaces
@@ -792,6 +800,17 @@ swap(string, at_this) {
 return lTrim(right) . left_space . at_this . right_space . rTrim(left)
 }
 
+; Logic to replace text in string using the anchor string at_this
+replaceWithNewText(string, at_this) {
+	stringGetPos, pos, string, % at_this
+	stringMid, left, string, pos, , L
+	stringGetPos, pos, string, % at_this
+	stringMid, right, string, pos + strLen(at_this) + 1
+	stringRight, left_space, left, % strLen(left) - strLen(rTrim(left))
+	stringLeft, right_space, right, % strLen(right) - strLen(lTrim(right))
+return lTrim(left) . right_space . at_this . left_space . rTrim(right)
+}
+
 ; https://www.autohotkey.com/board/topic/73844-tabs-to-spaces-which-preserves-alignment/
 ; Convert Tabs to Spaces
 TabsToSpaces(string, outEOL="`r`n", EOL="`n", Omit="`r"){
@@ -938,6 +957,40 @@ JsonToAHK(json, rec := false) {
 		}
 	}
 Return obj
+}
+
+; Type the replacement word to modify every occurrence of that word in a copied/highlighted string
+text_replace(string)
+{
+	loop, % strLen(string) / 1.6
+	div .= "- " ; Make divider between old string and new string
+	mouseGetPos, mx, my
+	replaced := string
+	toolTip, % "replace: """ . this . """`n`n" string "`n" div "`n" replaced, mx, my + 50 ; Display old string
+	; Loop ToolTip until endkey is selected
+	loop,
+	{
+		input, new_input, L1, {enter}{esc}{backspace}
+		endkey := strReplace(errorLevel, "EndKey:", "")
+		if endkey contains enter, escape
+			break
+		if (endkey = "backspace")
+			stringTrimRight, this, this, 1
+		if inStr(string, new_input)
+			this .= new_input
+		replaced := replaceWithNewText(string, this)
+		tooltip, % "replace: """ . this . """`n`n" string "`n" div "`n" replaced, mx, my + 50
+	}
+	tooltip, ; clear
+	; Save replaced text
+	if (this != "") and (endkey = "enter")
+	{
+		string := replaced
+		sleep 300
+	}
+	this := ""
+	div := ""
+return string
 }
 
 ; Exit app
