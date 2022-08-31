@@ -441,7 +441,7 @@ Menu_Action(ThisMenuItem, string)
 
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
-		Run, %string%
+		Run, chrome.exe %string%
 
 	; Run old portable CCleaner 5.87 in auto mode
 	Else If ThisMenuItem =&CCleaner
