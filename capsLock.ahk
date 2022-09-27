@@ -962,35 +962,9 @@ Return obj
 ; Type the replacement word to modify every occurrence of that word in a copied/highlighted string
 text_replace(string)
 {
-	loop, % strLen(string) / 1.6
-	div .= "- " ; Make divider between old string and new string
-	mouseGetPos, mx, my
-	replaced := string
-	toolTip, % "replace: """ . this . """`n`n" string "`n" div "`n" replaced, mx, my + 50 ; Display old string
-	; Loop ToolTip until endkey is selected
-	loop,
-	{
-		input, new_input, L1, {enter}{esc}{backspace}
-		endkey := strReplace(errorLevel, "EndKey:", "")
-		if endkey contains enter, escape
-			break
-		if (endkey = "backspace")
-			stringTrimRight, this, this, 1
-		if inStr(string, new_input)
-			this .= new_input
-		replaced := replaceWithNewText(string, this)
-		tooltip, % "replace: """ . this . """`n`n" string "`n" div "`n" replaced, mx, my + 50
-	}
-	tooltip, ; clear
-	; Save replaced text
-	if (this != "") and (endkey = "enter")
-	{
-		string := replaced
-		sleep 300
-	}
-	this := ""
-	div := ""
-return string
+	InputBox, originalText, "Original Text", "What text is being replaced?"
+	InputBox, replacementText, "Replacement Text", "What is the replacement text?"
+Return StrReplace(string, originalText, ReplacementText)
 }
 
 ; Exit app
