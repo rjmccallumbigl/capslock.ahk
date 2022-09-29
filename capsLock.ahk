@@ -13,10 +13,9 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.7.0
+ * 0.7.1
  *
  * TODO
- *  Replace specific text with another string in highlighted text
  *	Storage Usage
  *	Indicate what processes/programs are using this file (handles)
  *
@@ -108,6 +107,8 @@ MENU:
 		Menu,Convert,Check, &CapsLock Toggle
 	Else
 		Menu,Convert,uncheck, &CapsLock Toggle
+	Menu, convert, Add,
+	Menu, convert, Add, &Case Replace, MENU_ACTION
 	Menu, convert, Add,
 	Menu, convert, Add, &UPPER CASE, MENU_ACTION
 	Menu, convert, Add, &lower case, MENU_ACTION
@@ -587,6 +588,12 @@ Menu_Action(ThisMenuItem, string)
 		string := text_replace(string)
 	}
 
+	; Type the replacement word to modify every occurrence of that word in a copied/highlighted string
+	Else If ThisMenuItem =&Case Replace
+	{
+		string := multiple_text_replace(string)
+	}
+
 	; Convert Tabs to Spaces
 	Else If ThisMenuItem =&Tabs to Spaces
 	{
@@ -965,6 +972,16 @@ text_replace(string)
 	InputBox, originalText, "Original Text", "What text is being replaced?"
 	InputBox, replacementText, "Replacement Text", "What is the replacement text?"
 Return StrReplace(string, originalText, ReplacementText)
+}
+
+; Type the replacement words to modify every occurrence of that word in a copied/highlighted string
+multiple_text_replace(string)
+{
+	InputBox, caseNumber, "Case #", "What is the case number?"
+	InputBox, resourceID, "Resource ID", "What is the resource ID?"
+	replacement := StrReplace(string, "CASEID", caseNumber)
+	replacement := StrReplace(replacement, "RESOURCEID", resourceID)
+Return replacement
 }
 
 ; Exit app
