@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
  * https://www.autohotkey.com/board/topic/4310-capshift-slow-down-and-extend-the-caps-lock-key/
  *
  * VERSION
- * 0.7.1
+ * 0.7.2
  *
  * TODO
  *	Storage Usage
@@ -152,6 +152,7 @@ MENU:
 	Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
 	Menu, Browser Search..., Add, &Define, MENU_ACTION
 	Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
+	Menu, Browser Search..., Add, &Translate..., MENU_ACTION
 	Menu, convert, Add, &Browser Search..., :Browser Search...
 	Menu, convert, Add,
 	; Utilize Windows Explorer
@@ -201,7 +202,8 @@ MENU_ACTION:
 	clipboard := Menu_Action(A_ThisMenuItem, string)
 	WinActivate, ahk_id %Active_Window%
 	If (!stringGlobal){
-		Send, ^v
+		; Send, ^v
+		SendInput %Clipboard%
 	}
 	ToolTip, %A_ThisMenuItem%
 	SetTimer, TOOLTIP, On
@@ -444,7 +446,15 @@ Menu_Action(ThisMenuItem, string)
 
 	; If the copied text is a valid site, open it in web browser
 	Else If ThisMenuItem =&Open Page...
-		Run, %string%
+		Run, chrome.exe %string%
+
+	; Translate in Chrome
+	Else If ThisMenuItem =&Translate...
+	{
+		encodedString := StrReplace(string, A_Space, "+")
+		Run, chrome.exe https://www.google.com/search?q=translate+%encodedString%to+english
+
+	}
 
 	; Run old portable CCleaner 5.87 in auto mode
 	Else If ThisMenuItem =&CCleaner
