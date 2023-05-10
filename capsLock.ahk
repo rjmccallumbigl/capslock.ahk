@@ -456,7 +456,9 @@ Menu_Action(ThisMenuItem, string)
 
 	; Run  BleachBit portable
 	Else If ThisMenuItem =&Bleachbit
+	{
 		Run, powershell -NoExit -Command "D:\Dropbox\code\bleachbit.ps1"
+	}
 
 	; bleachbit.ps1
 	;###########################
