@@ -753,8 +753,8 @@ return
 
 ; Close ToolTip
 TOOLTIP:
-ToolTip,
-SetTimer, TOOLTIP, Off
+	ToolTip,
+	SetTimer, TOOLTIP, Off
 Return
 
 ; Get state of CapsLock
@@ -783,7 +783,7 @@ CapsLock_State_Toggle(State)
 text_swap(string)
 {
 	loop, % strLen(string) / 1.6
-		div .= "- " ; Make divider between old string and new string
+	div .= "- " ; Make divider between old string and new string
 	mouseGetPos, mx, my
 	swapped := string
 	toolTip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my + 50 ; Display old string
