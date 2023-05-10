@@ -24,8 +24,8 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 */
 
 ; Declare variables
-SetTimer,TOOLTIP,1500
-SetTimer,TOOLTIP,Off
+SetTimer, TOOLTIP, 1500
+SetTimer, TOOLTIP, Off
 TimeCapsToggle = 5
 TimeOut = 30
 global stringGlobal := ""
@@ -48,7 +48,7 @@ Gui +MinimizeBox
 	WheelDown::Send {Down}
 #If
 MouseIsOver(WinTitle){
-	MouseGetPos,,, Win
+	MouseGetPos, , , Win
 	Return WinExist(WinTitle . " ahk_id " . Win)
 }
 
@@ -105,9 +105,9 @@ Menu, convert, Add
 Menu, convert, Delete
 Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle
 If (GetKeyState("CapsLock", "T") = True)
-	Menu,Convert,Check, &CapsLock Toggle
+	Menu, Convert, Check, &CapsLock Toggle
 Else
-	Menu,Convert,uncheck, &CapsLock Toggle
+	Menu, Convert, uncheck, &CapsLock Toggle
 Menu, convert, Add,
 Menu, convert, Add, &UPPER CASE, MENU_ACTION
 Menu, convert, Add, &lower case, MENU_ACTION
@@ -186,10 +186,10 @@ Menu, convert, Add,
 Menu, TimeDate, Add, Time/Date, MENU_ACTION
 Menu, TimeDate, DeleteAll
 List := DateFormats(A_Now)
-TextMenuDate(List,"TimeDate","DateAction")
+TextMenuDate(List, "TimeDate", "DateAction")
 Menu, convert, Add, &Insert Time/Date..., :TimeDate
 Menu, convert, Add, &Insert Specified Time, MENU_ACTION
-Menu,convert, Default, &CapsLock Toggle
+Menu, convert, Default, &CapsLock Toggle
 Menu, convert, Show
 Return
 
@@ -225,7 +225,7 @@ Menu_Action(ThisMenuItem, string)
 	; Convert to HaLf CaPs CaSe (AKA alternating caps)
 	Else If ThisMenuItem =&SpOnGeBoB
 	{
-		StringCaseSense,On
+		StringCaseSense, On
 		newString := ""
 		splitString:= StrSplit(string)
 		for index, element in splitString
@@ -263,7 +263,7 @@ Menu_Action(ThisMenuItem, string)
 	; Convert to iNVERT cASE
 	Else If ThisMenuItem =&iNVERT cASE
 	{
-		StringCaseSense,On
+		StringCaseSense, On
 		lower = abcdefghijklmnopqrstuvwxyz
 		upper = ABCDEFGHIJKLMNOPQRSTUVWXYZ
 		StringLen, length, string
@@ -438,7 +438,7 @@ Menu_Action(ThisMenuItem, string)
 	; If the copied text is a valid file, open the parent folder in Windows Explorer and highlight the file
 	Else If ThisMenuItem =&Open Parent Folder...
 	{
-		SplitPath, string,, dir
+		SplitPath, string, , dir
 		Run explorer.exe /select`,%dir%
 	}
 
@@ -626,8 +626,8 @@ Menu_Action(ThisMenuItem, string)
 	; Take file out of current folder and add to parent folder
 	Else If ThisMenuItem =&Pull File Out to Parent Folder...
 	{
-		SplitPath, string,, dir
-		SplitPath, dir,, dir2
+		SplitPath, string, , dir
+		SplitPath, dir, , dir2
 		FileMove, %string%, %dir2%
 	}
 
@@ -745,7 +745,7 @@ return
 ; Close ToolTip
 TOOLTIP:
 ToolTip,
-SetTimer,TOOLTIP,Off
+SetTimer, TOOLTIP, Off
 Return
 
 ; Get state of CapsLock
@@ -903,7 +903,7 @@ DateFormats(Date)
 
 ; https://www.computoredge.com/AutoHotkey/Downloads/QuickLinksTimeDateSubMenuSwitch.ahk
 ; Creates DateTime Submenu
-TextMenuDate(TextOptions,Menu,Action)
+TextMenuDate(TextOptions, Menu, Action)
 {
 	StringSplit, MenuItems, TextOptions , ~
 	Loop %MenuItems0%
