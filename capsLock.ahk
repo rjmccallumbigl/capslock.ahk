@@ -95,6 +95,13 @@ CapsLock::
 	}
 Return
 
+; Double tap the shift button to activate caps lock
+~Shift Up::
+	If (A_PriorHotKey = A_ThisHotKey and A_TimeSincePriorHotkey < 500) {
+		Gosub, CapsLock_State_Toggle
+	}
+Return
+
 ; Build CapsLock menu
 MENU:
 Winget, Active_Window, ID, A
