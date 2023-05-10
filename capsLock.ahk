@@ -168,7 +168,7 @@ Menu, Scripts..., Add, &Run in CMD, MENU_ACTION
 Menu, Scripts..., Add, &Run in PowerShell, MENU_ACTION
 Menu, Scripts..., Add, &Run in Ubuntu, MENU_ACTION
 Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
-Menu, Scripts..., Add, &CCleaner, MENU_ACTION
+Menu, Scripts..., Add, &BleachBit, MENU_ACTION
 Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
 Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
 Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION
