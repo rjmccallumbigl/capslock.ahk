@@ -104,100 +104,100 @@ Return
 
 ; Build CapsLock menu
 MENU:
-	Winget, Active_Window, ID, A
-	Send, ^c
-	ClipWait, 1
-	; Default string manipulation
-	Menu, convert, Add
-	Menu, convert, Delete
-	Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle
-	If (GetKeyState("CapsLock", "T") = True)
-		Menu, Convert, Check, &CapsLock Toggle
-	Else
-		Menu, Convert, uncheck, &CapsLock Toggle
-	Menu, convert, Add,
-	Menu, convert, Add, &UPPER CASE, MENU_ACTION
-	Menu, convert, Add, &lower case, MENU_ACTION
-	Menu, convert, Add,
-	Menu, convert, Add, &Title Case, MENU_ACTION
-	Menu, convert, Add, &Sentence case, MENU_ACTION
-	Menu, convert, Add, &iNVERT cASE, MENU_ACTION
-	Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
-	Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION
-	Menu, convert, Add,
-	; Advanced string manipulation
-	Menu, Modify Text..., Add, Remove_&under_scores, MENU_ACTION
-	Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
-	Menu, Modify Text..., Add, Remove-&dashes, MENU_ACTION
-	Menu, Modify Text..., Add, Remove_illegal_characters, MENU_ACTION
-	Menu, Modify Text..., Add, Remove &emojis, MENU_ACTION
-	Menu, Modify Text..., Add, Remove &Uppercase, MENU_ACTION
-	Menu, Modify Text..., Add, Remove &Lowercase, MENU_ACTION
-	Menu, Modify Text..., Add, &`Sort, MENU_ACTION
-	Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
-	Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
-	Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
-	Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
-	Menu, convert, Add, &Modify Text..., :Modify Text...
-	Menu, convert, Add,
-	; Wrap text (coding)
-	Menu, Wrap Text..., Add, &`(...), MENU_ACTION
-	Menu, Wrap Text..., Add, &`{...}, MENU_ACTION
-	Menu, Wrap Text..., Add, &`[...], MENU_ACTION
-	Menu, Wrap Text..., Add, &`<...>, MENU_ACTION
-	Menu, Wrap Text..., Add, `<&#...#>, MENU_ACTION
-	Menu, Wrap Text..., Add, &`/*...*/, MENU_ACTION
-	Menu, Wrap Text..., Add, &`'...', MENU_ACTION
-	Menu, Wrap Text..., Add, &`"...", MENU_ACTION
-	Menu, convert, Add, &Wrap Text..., :Wrap Text...
-	Menu, convert, Add,
-	; Utilize internet browser
-	Menu, Browser Search..., Add, &Google, MENU_ACTION
-	Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
-	Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
-	Menu, Browser Search..., Add, &Define, MENU_ACTION
-	Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
-	Menu, Browser Search..., Add, &Translate..., MENU_ACTION
-	Menu, convert, Add, &Browser Search..., :Browser Search...
-	Menu, convert, Add,
-	; Utilize Windows Explorer
-	Menu, Explorer..., Add, &Open Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION
-	Menu, Explorer..., Add, &Add File to Subfolder..., MENU_ACTION
-	Menu, Explorer..., Add, &Pull File Out to Parent Folder..., MENU_ACTION
-	Menu, Explorer..., Add, &Clipboard to File..., MENU_ACTION
-	Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION
-	Menu, convert, Add, &Explorer..., :Explorer...
-	Menu, convert, Add,
-	; Run scripts
-	Menu, Scripts..., Add, &Run in CMD, MENU_ACTION
-	Menu, Scripts..., Add, &Run in PowerShell, MENU_ACTION
-	Menu, Scripts..., Add, &Run in Ubuntu, MENU_ACTION
-	Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
-	Menu, Scripts..., Add, &BleachBit, MENU_ACTION
-	Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
-	Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
-	Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION
-	Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION
-	Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION
-	Menu, convert, Add, &Scripts..., :Scripts...
-	Menu, convert, Add,
-	; Image manipulation
-	Menu, Images..., Add, Save image from clipboard to &folder, MENU_ACTION
-	Menu, Images..., Add, OCR with &Vis2.ahk, MENU_ACTION
-	Menu, Images..., Add, Get &HEX value from cursor, MENU_ACTION
-	Menu, convert, Add, &Images..., :Images...
-	Menu, convert, Add,
-	; Insert/modify datetime strings
-	Menu, TimeDate, Add, Time/Date, MENU_ACTION
-	Menu, TimeDate, DeleteAll
-	List := DateFormats(A_Now)
-	TextMenuDate(List, "TimeDate", "DateAction")
-	Menu, convert, Add, &Insert Time/Date..., :TimeDate
-	Menu, convert, Add, &Insert Specified Time, MENU_ACTION
-	Menu, convert, Default, &CapsLock Toggle
-	Menu, convert, Show
+Winget, Active_Window, ID, A
+Send, ^c
+ClipWait, 1
+; Default string manipulation
+Menu, convert, Add
+Menu, convert, Delete
+Menu, convert, Add, &CapsLock Toggle, CapsLock_State_Toggle
+If (GetKeyState("CapsLock", "T") = True)
+	Menu, Convert, Check, &CapsLock Toggle
+Else
+	Menu, Convert, uncheck, &CapsLock Toggle
+Menu, convert, Add,
+Menu, convert, Add, &UPPER CASE, MENU_ACTION
+Menu, convert, Add, &lower case, MENU_ACTION
+Menu, convert, Add,
+Menu, convert, Add, &Title Case, MENU_ACTION
+Menu, convert, Add, &Sentence case, MENU_ACTION
+Menu, convert, Add, &iNVERT cASE, MENU_ACTION
+Menu, convert, Add, &SpOnGeBoB, MENU_ACTION
+Menu, convert, Add, &S p r e a d T e x t, MENU_ACTION
+Menu, convert, Add,
+; Advanced string manipulation
+Menu, Modify Text..., Add, Remove_&under_scores, MENU_ACTION
+Menu, Modify Text..., Add, Remove.&full.stops, MENU_ACTION
+Menu, Modify Text..., Add, Remove-&dashes, MENU_ACTION
+Menu, Modify Text..., Add, Remove_illegal_characters, MENU_ACTION
+Menu, Modify Text..., Add, Remove &emojis, MENU_ACTION
+Menu, Modify Text..., Add, Remove &Uppercase, MENU_ACTION
+Menu, Modify Text..., Add, Remove &Lowercase, MENU_ACTION
+Menu, Modify Text..., Add, &`Sort, MENU_ACTION
+Menu, Modify Text..., Add, &snake_Case to camelCase, MENU_ACTION
+Menu, Modify Text..., Add, &Swap at Anchor Word, MENU_ACTION
+Menu, Modify Text..., Add, &Tabs to Spaces, MENU_ACTION
+Menu, Modify Text..., Add, &Spaces to Tabs, MENU_ACTION
+Menu, convert, Add, &Modify Text..., :Modify Text...
+Menu, convert, Add,
+; Wrap text (coding)
+Menu, Wrap Text..., Add, &`(...), MENU_ACTION
+Menu, Wrap Text..., Add, &`{...}, MENU_ACTION
+Menu, Wrap Text..., Add, &`[...], MENU_ACTION
+Menu, Wrap Text..., Add, &`<...>, MENU_ACTION
+Menu, Wrap Text..., Add, `<&#...#>, MENU_ACTION
+Menu, Wrap Text..., Add, &`/*...*/, MENU_ACTION
+Menu, Wrap Text..., Add, &`'...', MENU_ACTION
+Menu, Wrap Text..., Add, &`"...", MENU_ACTION
+Menu, convert, Add, &Wrap Text..., :Wrap Text...
+Menu, convert, Add,
+; Utilize internet browser
+Menu, Browser Search..., Add, &Google, MENU_ACTION
+Menu, Browser Search..., Add, &Thesaurus, MENU_ACTION
+Menu, Browser Search..., Add, &Wikipedia, MENU_ACTION
+Menu, Browser Search..., Add, &Define, MENU_ACTION
+Menu, Browser Search..., Add, &Open Page..., MENU_ACTION
+Menu, Browser Search..., Add, &Translate..., MENU_ACTION
+Menu, convert, Add, &Browser Search..., :Browser Search...
+Menu, convert, Add,
+; Utilize Windows Explorer
+Menu, Explorer..., Add, &Open Folder..., MENU_ACTION
+Menu, Explorer..., Add, &Open Parent Folder..., MENU_ACTION
+Menu, Explorer..., Add, &Copy File Names and Details from Folder to Clipboard..., MENU_ACTION
+Menu, Explorer..., Add, &Add File to Subfolder..., MENU_ACTION
+Menu, Explorer..., Add, &Pull File Out to Parent Folder..., MENU_ACTION
+Menu, Explorer..., Add, &Clipboard to File..., MENU_ACTION
+Menu, Explorer..., Add, &File to Clipboard..., MENU_ACTION
+Menu, convert, Add, &Explorer..., :Explorer...
+Menu, convert, Add,
+; Run scripts
+Menu, Scripts..., Add, &Run in CMD, MENU_ACTION
+Menu, Scripts..., Add, &Run in PowerShell, MENU_ACTION
+Menu, Scripts..., Add, &Run in Ubuntu, MENU_ACTION
+Menu, Scripts..., Add, Check Sensitivity with &Alex.ps1 (npm), MENU_ACTION
+Menu, Scripts..., Add, &BleachBit, MENU_ACTION
+Menu, Scripts..., Add, &RemoveResourceGroups.ps1, MENU_ACTION
+Menu, Scripts..., Add, &createNewVM.ps1, MENU_ACTION
+Menu, Scripts..., Add, &{Update NSGS}.ps1, MENU_ACTION
+Menu, Scripts..., Add, &getDiskSpace.ps1, MENU_ACTION
+Menu, Scripts..., Add, &grepFolder.ps1, MENU_ACTION
+Menu, convert, Add, &Scripts..., :Scripts...
+Menu, convert, Add,
+; Image manipulation
+Menu, Images..., Add, Save image from clipboard to &folder, MENU_ACTION
+Menu, Images..., Add, OCR with &Vis2.ahk, MENU_ACTION
+Menu, Images..., Add, Get &HEX value from cursor, MENU_ACTION
+Menu, convert, Add, &Images..., :Images...
+Menu, convert, Add,
+; Insert/modify datetime strings
+Menu, TimeDate, Add, Time/Date, MENU_ACTION
+Menu, TimeDate, DeleteAll
+List := DateFormats(A_Now)
+TextMenuDate(List, "TimeDate", "DateAction")
+Menu, convert, Add, &Insert Time/Date..., :TimeDate
+Menu, convert, Add, &Insert Specified Time, MENU_ACTION
+Menu, convert, Default, &CapsLock Toggle
+Menu, convert, Show
 Return
 
 ; Pass copied string to specified menu action, then paste if required
@@ -753,8 +753,8 @@ return
 
 ; Close ToolTip
 TOOLTIP:
-	ToolTip,
-	SetTimer, TOOLTIP, Off
+ToolTip,
+SetTimer, TOOLTIP, Off
 Return
 
 ; Get state of CapsLock
@@ -783,7 +783,7 @@ CapsLock_State_Toggle(State)
 text_swap(string)
 {
 	loop, % strLen(string) / 1.6
-	div .= "- " ; Make divider between old string and new string
+		div .= "- " ; Make divider between old string and new string
 	mouseGetPos, mx, my
 	swapped := string
 	toolTip, % "swap at: """ . this . """`n`n" string "`n" div "`n" swapped, mx, my + 50 ; Display old string
